@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lively Lemon Todo - 鮮檸活潑待辦事項</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tone.js for cheerful sound effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Google Fonts: Fredoka & Noto Sans TC for rounded lively text -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#fefbf2',      // Background canvas
+                        lemon: '#f8d152',      // Bright Lemon Yellow
+                        citrus: '#f7ab3e',     // Warm Terracotta / Orange
+                        ceramic: '#5e6cb3',    // Mediterranean Blue
+                        'ceramic-dark': '#485496',
+                        'citrus-dark': '#e09428',
+                    },
+                    fontFamily: {
+                        sans: ['Fredoka', 'Noto Sans TC', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'pop-blue': '4px 4px 0px 0px #5e6cb3',
+                        'pop-citrus': '4px 4px 0px 0px #f7ab3e',
+                        'pop-lemon': '4px 4px 0px 0px #f8d152',
+                        'pop-dark': '4px 4px 0px 0px #2d3748',
+                        'pop-sm': '2px 2px 0px 0px #5e6cb3',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Doodle / Line-Art UI Styling */
+        body {
+            background-color: #fefbf2;
+            color: #2b2d42;
+            font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+            background-image: radial-gradient(#5e6cb3 0.75px, transparent 0.75px), radial-gradient(#f7ab3e 0.75px, #fefbf2 0.75px);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            background-opacity: 0.15;
+        }
+
+        .doodle-card {
+            background-color: #ffffff;
+            border: 3px solid #5e6cb3;
+            border-radius: 1.25rem;
+            box-shadow: 5px 5px 0px 0px #5e6cb3;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .doodle-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 7px 7px 0px 0px #5e6cb3;
+        }
+
+        .doodle-btn {
+            border: 3px solid #2b2d42;
+            border-radius: 0.85rem;
+            font-weight: 600;
+            transition: all 0.15s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .doodle-btn:active {
+            transform: translate(2px, 2px) !important;
+            box-shadow: 0px 0px 0px 0px !important;
+        }
+
+        .doodle-input {
+            border: 3px solid #5e6cb3;
+            border-radius: 0.85rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .doodle-input:focus {
+            border-color: #f7ab3e;
+            box-shadow: 3px 3px 0px 0px #f7ab3e;
+        }
+
+        /* Wavy divider style */
+        .wavy-line {
+            height: 8px;
+            background: repeat-x url("data:image/svg+xml,%3Csvg width='20' height='8' viewBox='0 0 20 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 4C5 0 5 8 10 4C15 0 15 8 20 4' stroke='%5E6CB3' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E");
+        }
+
+        /* Custom Checkbox */
+        .custom-checkbox {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #5e6cb3;
+            border-radius: 8px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            background: #ffffff;
+        }
+
+        .custom-checkbox:checked {
+            background-color: #f8d152;
+            border-color: #5e6cb3;
+        }
+
+        .custom-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            color: #5e6cb3;
+            font-weight: 900;
+            font-size: 16px;
+            top: -3px;
+            left: 3px;
+        }
+
+        /* Canvas for celebratory confetti */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #fefbf2;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #5e6cb3;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-16 pt-4 px-3 sm:px-6">
+
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- Passcode Pairing Modal -->
+    <div id="passcode-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="doodle-card max-w-md w-full p-6 bg-white relative animate-in fade-in zoom-in duration-200">
+            <button onclick="closePasscodeModal()" class="absolute top-4 right-4 text-slate-500 hover:text-slate-800 text-xl font-bold w-8 h-8 rounded-full border-2 border-slate-300 flex items-center justify-center">
+                ✕
+            </button>
+            
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-lemon border-3 border-ceramic flex items-center justify-center text-2xl shadow-pop-sm">
+                    🔑
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-ceramic">Passcode 跨裝置同步</h3>
+                    <p class="text-xs text-slate-500">輸入相同金鑰，即可與手機/電腦即時同步</p>
+                </div>
+            </div>
+
+            <div class="wavy-line my-4"></div>
+
+            <!-- Current Passcode Box -->
+            <div class="bg-cream p-4 rounded-xl border-2 border-ceramic mb-5">
+                <label class="block text-xs font-bold text-slate-600 mb-1">您的當前同步金鑰 (Current Passcode)</label>
+                <div class="flex items-center gap-2">
+                    <input id="modal-current-passcode" type="text" readonly class="w-full bg-white font-mono text-lg font-bold px-3 py-2 border-2 border-ceramic rounded-lg text-ceramic text-center tracking-widest select-all">
+                    <button onclick="copyPasscode()" class="doodle-btn px-4 py-2 bg-lemon text-slate-800 hover:bg-yellow-300 shadow-pop-dark flex-shrink-0 text-sm">
+                        <i class="fa-solid fa-copy"></i> 複製
+                    </button>
+                </div>
+            </div>
+
+            <!-- Switch / Join New Passcode Form -->
+            <div class="space-y-3">
+                <label class="block text-xs font-bold text-slate-600">切換或加入已知金鑰頻道：</label>
+                <div class="flex gap-2">
+                    <input id="input-new-passcode" type="text" placeholder="例如: LEMON-888" class="doodle-input w-full px-3 py-2 text-center uppercase tracking-wider font-mono font-bold">
+                    <button onclick="switchPasscode()" class="doodle-btn px-4 py-2 bg-citrus text-white hover:bg-citrus-dark shadow-pop-dark flex-shrink-0 text-sm">
+                        連接 Live
+                    </button>
+                </div>
+                <div class="flex items-center justify-between text-xs text-slate-500 pt-2">
+                    <span>提示：任意自訂 4~10 碼英數字即可建立專屬清單</span>
+                    <button onclick="generateRandomPasscode()" class="text-ceramic font-bold underline hover:text-citrus">
+                        <i class="fa-solid fa-dice"></i> 隨機生成
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto space-y-6">
+
+        <!-- Top Header Navigation -->
+        <header class="doodle-card p-4 sm:p-6 bg-cream border-4 border-ceramic flex flex-col md:flex-row items-center justify-between gap-4">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3">
+                <div class="w-14 h-14 bg-lemon border-3 border-ceramic rounded-2xl flex items-center justify-center text-3xl shadow-pop-blue transform -rotate-3 hover:rotate-6 transition-transform">
+                    🍋
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-2xl sm:text-3xl font-black text-ceramic tracking-wide">Lively Todo</h1>
+                        <span class="bg-citrus text-white text-xs font-black px-2 py-0.5 rounded-full border border-slate-900 shadow-pop-sm">v2.0</span>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-600 font-medium">跨裝置即時同步待辦清單</p>
+                </div>
+            </div>
+
+            <!-- Live Status & Passcode Pairing Bar -->
+            <div class="flex items-center gap-2 flex-wrap justify-center sm:justify-end w-full md:w-auto">
+                <!-- Sync Connection Status Badge -->
+                <div id="sync-status-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 border-ceramic bg-white text-xs font-bold shadow-pop-sm">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="sync-status-text" class="text-slate-700">正在連接雲端...</span>
+                </div>
+
+                <!-- Passcode Quick Button -->
+                <button onclick="openPasscodeModal()" class="doodle-btn px-3.5 py-1.5 bg-lemon text-slate-900 hover:bg-yellow-300 shadow-pop-dark flex items-center gap-2 text-xs sm:text-sm">
+                    <i class="fa-solid fa-key text-citrus-dark"></i>
+                    <span>頻道: <strong id="header-passcode-display" class="font-mono tracking-wider">------</strong></span>
+                    <i class="fa-solid fa-gear text-slate-600 text-xs ml-1"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Progress Dashboard Card -->
+        <section class="doodle-card p-5 bg-white border-3 border-ceramic relative overflow-hidden">
+            <!-- Mediterranean Tile Corner Accent -->
+            <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-lemon/30 rounded-full border-2 border-dashed border-ceramic pointer-events-none"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                <!-- Left: Stats -->
+                <div class="md:col-span-1 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">完成度 (Completion)</span>
+                        <span id="stat-percentage" class="text-xl font-black text-citrus">0%</span>
+                    </div>
+                    <div class="w-full h-4 bg-cream border-2 border-ceramic rounded-full overflow-hidden p-0.5 shadow-inner">
+                        <div id="stat-progress-bar" class="h-full bg-gradient-to-r from-lemon via-citrus to-ceramic rounded-full transition-all duration-500 w-0"></div>
+                    </div>
+                    <div class="flex justify-between text-xs font-bold text-slate-600 pt-1">
+                        <span>全部: <strong id="stat-total" class="text-ceramic">0</strong></span>
+                        <span>待辦: <strong id="stat-pending" class="text-citrus">0</strong></span>
+                        <span>已完成: <strong id="stat-completed" class="text-emerald-600">0</strong></span>
+                    </div>
+                </div>
+
+                <!-- Middle: Filter Pills -->
+                <div class="md:col-span-2 flex flex-wrap items-center justify-start md:justify-end gap-2">
+                    <button onclick="setFilter('all')" id="filter-btn-all" class="doodle-btn px-3 py-1.5 text-xs bg-ceramic text-white shadow-pop-dark">
+                        <i class="fa-solid fa-list-check mr-1"></i> 全部 (<span id="count-all">0</span>)
+                    </button>
+                    <button onclick="setFilter('active')" id="filter-btn-active" class="doodle-btn px-3 py-1.5 text-xs bg-cream text-slate-700 hover:bg-lemon shadow-pop-dark">
+                        <i class="fa-regular fa-circle mr-1"></i> 未完成 (<span id="count-active">0</span>)
+                    </button>
+                    <button onclick="setFilter('completed')" id="filter-btn-completed" class="doodle-btn px-3 py-1.5 text-xs bg-cream text-slate-700 hover:bg-lemon shadow-pop-dark">
+                        <i class="fa-solid fa-circle-check mr-1"></i> 已完成 (<span id="count-completed">0</span>)
+                    </button>
+                    <button onclick="setFilter('high')" id="filter-btn-high" class="doodle-btn px-3 py-1.5 text-xs bg-cream text-slate-700 hover:bg-lemon shadow-pop-dark">
+                        <i class="fa-solid fa-fire text-citrus mr-1"></i> 高優先 (<span id="count-high">0</span>)
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Add Task Form -->
+        <section class="doodle-card p-5 bg-lemon/20 border-3 border-ceramic">
+            <h2 class="text-lg font-bold text-ceramic mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-plus-circle text-citrus"></i> 新增待辦事項 (New Task)
+            </h2>
+            
+            <form id="todo-form" onsubmit="handleAddTask(event)" class="space-y-4">
+                <!-- Title & Add Button -->
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input id="input-title" type="text" placeholder="今天想完成什麼任務呢？" required 
+                        class="doodle-input w-full px-4 py-3 bg-white text-slate-800 text-sm font-medium placeholder-slate-400">
+                    
+                    <button type="submit" class="doodle-btn px-6 py-3 bg-citrus text-white hover:bg-citrus-dark shadow-pop-dark flex items-center justify-center gap-2 text-base font-bold flex-shrink-0">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>加入待辦</span>
+                    </button>
+                </div>
+
+                <!-- Category, Priority, Due Date options -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                    <!-- Category -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1"><i class="fa-solid fa-tag"></i> 分類 (Category)</label>
+                        <select id="input-category" class="doodle-input w-full px-3 py-2 bg-white text-xs font-bold text-slate-700">
+                            <option value="🏠 個人">🏠 個人 (Personal)</option>
+                            <option value="💼 工作">💼 工作 (Work)</option>
+                            <option value="💡 創意">💡 創意 (Ideas)</option>
+                            <option value="🛒 購物">🛒 購物 (Shopping)</option>
+                            <option value="🎯 目標">🎯 目標 (Goals)</option>
+                        </select>
+                    </div>
+
+                    <!-- Priority -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1"><i class="fa-solid fa-flag"></i> 優先程度 (Priority)</label>
+                        <select id="input-priority" class="doodle-input w-full px-3 py-2 bg-white text-xs font-bold text-slate-700">
+                            <option value="low">🟢 一般 (Low)</option>
+                            <option value="medium" selected>🟡 中等 (Medium)</option>
+                            <option value="high">🔴 緊急 (High)</option>
+                        </select>
+                    </div>
+
+                    <!-- Due Date -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1"><i class="fa-regular fa-calendar"></i> 截止日期 (Due Date)</label>
+                        <input id="input-duedate" type="date" class="doodle-input w-full px-3 py-2 bg-white text-xs font-bold text-slate-700">
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <!-- Task Search & Controls Bar -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-1">
+            <div class="relative w-full sm:w-72">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input id="search-input" oninput="renderTodoList()" type="text" placeholder="搜尋待辦事項..." class="doodle-input w-full pl-9 pr-3 py-2 text-xs bg-white">
+            </div>
+
+            <div class="flex items-center gap-2 self-end sm:self-auto">
+                <span class="text-xs font-bold text-slate-500">排序:</span>
+                <select id="sort-select" onchange="renderTodoList()" class="doodle-input px-3 py-1.5 text-xs bg-white font-bold text-slate-700">
+                    <option value="created_desc">最新建立 (Newest)</option>
+                    <option value="created_asc">最早建立 (Oldest)</option>
+                    <option value="priority_desc">優先級高優先 (Priority)</option>
+                    <option value="duedate_asc">截止日靠近 (Due Soon)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Task Items Container -->
+        <main id="todo-list-container" class="space-y-3">
+            <!-- Skeleton Loading State -->
+            <div class="doodle-card p-8 bg-white text-center space-y-3">
+                <div class="inline-block animate-spin text-3xl text-citrus">🍋</div>
+                <p class="text-sm font-bold text-ceramic">同步載入中，請稍候...</p>
+            </div>
+        </main>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // APP Identity & Config Setup
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'lively-lemon-todo-app';
+        
+        // Fallback demo config if firebase config is not injected locally
+        const defaultFirebaseConfig = {
+            apiKey: "AIzaSyDemoConfigKeyForStaticTestingOnly",
+            authDomain: "demo-app.firebaseapp.com",
+            projectId: "demo-app",
+            storageBucket: "demo-app.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef123456"
+        };
+
+        const firebaseConfig = typeof __firebase_config !== 'undefined' 
+            ? JSON.parse(__firebase_config) 
+            : defaultFirebaseConfig;
+
+        // Global State variables
+        window.db = null;
+        window.auth = null;
+        window.currentUser = null;
+        window.activePasscode = localStorage.getItem('lemon_todo_passcode') || generatePasscodeCode();
+        window.todos = [];
+        window.currentFilter = 'all';
+        window.unsubscribeSnapshot = null;
+
+        // Initialize Firebase
+        try {
+            const app = initializeApp(firebaseConfig);
+            window.db = getFirestore(app);
+            window.auth = getAuth(app);
+
+            // Handle Authentication First
+            initAuthentication();
+        } catch (err) {
+            console.warn("Firebase initialization notice:", err);
+            updateSyncBadge(false, "離線預覽模式");
+            loadLocalFallbackData();
+        }
+
+        async function initAuthentication() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(window.auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(window.auth);
+                }
+            } catch (authError) {
+                console.warn("Auth fallback to anonymous:", authError);
+                try {
+                    await signInAnonymously(window.auth);
+                } catch(e) {
+                    console.error("Auth failed:", e);
+                }
+            }
+
+            onAuthStateChanged(window.auth, (user) => {
+                if (user) {
+                    window.currentUser = user;
+                    updateSyncBadge(true, "雲端同步中");
+                    subscribeToPasscodeChannel(window.activePasscode);
+                } else {
+                    updateSyncBadge(false, "未連線");
+                }
+            });
+        }
+
+        window.subscribeToPasscodeChannel = function(passcode) {
+            // Unsubscribe previous snapshot if exists
+            if (window.unsubscribeSnapshot) {
+                window.unsubscribeSnapshot();
+                window.unsubscribeSnapshot = null;
+            }
+
+            const sanitizedCode = passcode.replace(/[^a-zA-Z0-9_-]/g, '').toUpperCase();
+            window.activePasscode = sanitizedCode;
+            localStorage.setItem('lemon_todo_passcode', sanitizedCode);
+
+            // Update UI Passcode labels
+            document.getElementById('header-passcode-display').innerText = sanitizedCode;
+            document.getElementById('modal-current-passcode').value = sanitizedCode;
+
+            if (!window.db || !window.currentUser) {
+                return;
+            }
+
+            updateSyncBadge(true, "數據連線中...");
+
+            // RULE 1 Path Compliance: /artifacts/{appId}/public/data/{collectionName}/{documentId}
+            // Document storing task list array payload for this passcode
+            const roomDocRef = doc(window.db, 'artifacts', appId, 'public', 'data', 'todo_passcode_channels', sanitizedCode);
+
+            window.unsubscribeSnapshot = onSnapshot(roomDocRef, 
+                (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        window.todos = Array.isArray(data.items) ? data.items : [];
+                    } else {
+                        // Channel does not exist yet; initialize with welcome tasks
+                        window.todos = getDefaultWelcomeTasks();
+                        saveToFirestore();
+                    }
+                    updateSyncBadge(true, "即時同步 Live");
+                    renderTodoList();
+                },
+                (error) => {
+                    console.error("Firestore sync error:", error);
+                    updateSyncBadge(false, "離線模式");
+                    showToast("⚠️ 無法連線雲端，切換至本地資料", "citrus");
+                }
+            );
+        };
+
+        window.saveToFirestore = async function() {
+            renderTodoList(); // Immediate local UI update
+            
+            if (!window.db || !window.currentUser) {
+                localStorage.setItem('lemon_todos_backup_' + window.activePasscode, JSON.stringify(window.todos));
+                return;
+            }
+
+            try {
+                const sanitizedCode = window.activePasscode;
+                const roomDocRef = doc(window.db, 'artifacts', appId, 'public', 'data', 'todo_passcode_channels', sanitizedCode);
+                await setDoc(roomDocRef, {
+                    items: window.todos,
+                    updatedAt: new Date().toISOString(),
+                    lastUpdatedBy: window.currentUser.uid
+                }, { merge: true });
+            } catch (err) {
+                console.error("Error saving doc:", err);
+                showToast("保存資料時發生錯誤", "citrus");
+            }
+        };
+
+        function generatePasscodeCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let result = 'LEMON-';
+            for (let i = 0; i < 4; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function getDefaultWelcomeTasks() {
+            return [
+                {
+                    id: 'welcome-1',
+                    title: '🍋 歡迎體驗 Lively Lemon 待辦事項 APP！',
+                    category: '🏠 個人',
+                    priority: 'high',
+                    dueDate: new Date().toISOString().split('T')[0],
+                    completed: false,
+                    createdAt: Date.now() - 10000
+                },
+                {
+                    id: 'welcome-2',
+                    title: '🔑 點擊右上角「金鑰」可在手機/電腦打入同碼即時同步！',
+                    category: '💡 創意',
+                    priority: 'medium',
+                    dueDate: '',
+                    completed: false,
+                    createdAt: Date.now() - 5000
+                }
+            ];
+        }
+
+        function loadLocalFallbackData() {
+            const localData = localStorage.getItem('lemon_todos_backup_' + window.activePasscode);
+            if (localData) {
+                try {
+                    window.todos = JSON.parse(localData);
+                } catch(e) {
+                    window.todos = getDefaultWelcomeTasks();
+                }
+            } else {
+                window.todos = getDefaultWelcomeTasks();
+            }
+            renderTodoList();
+        }
+    </script>
+
+    <script>
+        // Audio Chime setup with Tone.js
+        let synth = null;
+        function playSuccessSound() {
+            try {
+                if (!synth && window.Tone) {
+                    synth = new Tone.PolySynth(Tone.Synth, {
+                        oscillator: { type: 'triangle' },
+                        envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.4 }
+                    }).toDestination();
+                }
+                if (synth && Tone.context.state === 'running') {
+                    synth.triggerAttackRelease(["C5", "E5", "G5"], "8n");
+                } else if (window.Tone) {
+                    Tone.start().then(() => {
+                        if (synth) synth.triggerAttackRelease(["C5", "E5", "G5"], "8n");
+                    });
+                }
+            } catch (e) {
+                // Ignore audio block policies
+            }
+        }
+
+        // Add new task handler
+        function handleAddTask(e) {
+            e.preventDefault();
+            const titleInput = document.getElementById('input-title');
+            const categoryInput = document.getElementById('input-category');
+            const priorityInput = document.getElementById('input-priority');
+            const duedateInput = document.getElementById('input-duedate');
+
+            const title = titleInput.value.trim();
+            if (!title) return;
+
+            const newTask = {
+                id: 'task_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+                title: title,
+                category: categoryInput.value,
+                priority: priorityInput.value,
+                dueDate: duedateInput.value,
+                completed: false,
+                createdAt: Date.now()
+            };
+
+            window.todos.unshift(newTask);
+            titleInput.value = '';
+            
+            saveToFirestore();
+            showToast("✨ 已新增待辦事項！", "lemon");
+        }
+
+        // Toggle Complete
+        window.toggleTaskComplete = function(id) {
+            const task = window.todos.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                if (task.completed) {
+                    playSuccessSound();
+                    triggerConfetti();
+                    showToast("🎉 太棒了，完成一個目標！", "citrus");
+                }
+                saveToFirestore();
+            }
+        };
+
+        // Delete Task
+        window.deleteTask = function(id) {
+            window.todos = window.todos.filter(t => t.id !== id);
+            saveToFirestore();
+            showToast("🗑️ 已刪除該項目", "slate");
+        };
+
+        // Edit Task Inline
+        window.editTaskTitle = function(id, currentTitle) {
+            const newTitle = prompt("修改待辦事項內容：", currentTitle);
+            if (newTitle !== null && newTitle.trim() !== "") {
+                const task = window.todos.find(t => t.id === id);
+                if (task) {
+                    task.title = newTitle.trim();
+                    saveToFirestore();
+                    showToast("✏️ 已更新待辦事項", "lemon");
+                }
+            }
+        };
+
+        // Set Filter
+        window.setFilter = function(filter) {
+            window.currentFilter = filter;
+            
+            // Highlight active button
+            ['all', 'active', 'completed', 'high'].forEach(f => {
+                const btn = document.getElementById(`filter-btn-${f}`);
+                if (btn) {
+                    if (f === filter) {
+                        btn.className = "doodle-btn px-3 py-1.5 text-xs bg-ceramic text-white shadow-pop-dark font-bold";
+                    } else {
+                        btn.className = "doodle-btn px-3 py-1.5 text-xs bg-cream text-slate-700 hover:bg-lemon shadow-pop-dark";
+                    }
+                }
+            });
+
+            renderTodoList();
+        };
+
+        // Render Todo List
+        function renderTodoList() {
+            const container = document.getElementById('todo-list-container');
+            if (!container) return;
+
+            const searchQuery = (document.getElementById('search-input')?.value || '').toLowerCase();
+            const sortOption = document.getElementById('sort-select')?.value || 'created_desc';
+
+            // Filter
+            let filtered = window.todos.filter(item => {
+                // Category/Status Filter
+                if (window.currentFilter === 'active' && item.completed) return false;
+                if (window.currentFilter === 'completed' && !item.completed) return false;
+                if (window.currentFilter === 'high' && item.priority !== 'high') return false;
+
+                // Search Filter
+                if (searchQuery) {
+                    const matchTitle = item.title.toLowerCase().includes(searchQuery);
+                    const matchCat = item.category.toLowerCase().includes(searchQuery);
+                    return matchTitle || matchCat;
+                }
+
+                return true;
+            });
+
+            // Sort
+            filtered.sort((a, b) => {
+                if (sortOption === 'created_desc') return b.createdAt - a.createdAt;
+                if (sortOption === 'created_asc') return a.createdAt - b.createdAt;
+                if (sortOption === 'priority_desc') {
+                    const weight = { high: 3, medium: 2, low: 1 };
+                    return weight[b.priority] - weight[a.priority];
+                }
+                if (sortOption === 'duedate_asc') {
+                    if (!a.dueDate) return 1;
+                    if (!b.dueDate) return -1;
+                    return a.dueDate.localeCompare(b.dueDate);
+                }
+                return 0;
+            });
+
+            // Update Counts
+            updateStatistics();
+
+            // Render Empty State
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="doodle-card p-10 text-center bg-white border-2 border-dashed border-ceramic">
+                        <div class="text-4xl mb-2">🍹</div>
+                        <h3 class="text-base font-bold text-ceramic">沒有符合條件的待辦事項</h3>
+                        <p class="text-xs text-slate-500 mt-1">稍微放鬆一下，或是新增一個任務吧！</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Render List Items
+            container.innerHTML = filtered.map(item => {
+                const priorityBadgeClass = {
+                    high: 'bg-rose-100 text-rose-700 border-rose-400',
+                    medium: 'bg-lemon/40 text-slate-800 border-ceramic',
+                    low: 'bg-emerald-100 text-emerald-800 border-emerald-400'
+                }[item.priority] || 'bg-slate-100 text-slate-700';
+
+                const priorityLabel = {
+                    high: '🔴 高',
+                    medium: '🟡 中',
+                    low: '🟢 低'
+                }[item.priority];
+
+                const isCompleted = item.completed;
+
+                return `
+                    <div class="doodle-card p-4 transition-all ${isCompleted ? 'bg-slate-50/80 opacity-75' : 'bg-white'} border-3 border-ceramic flex items-start justify-between gap-3 group">
+                        
+                        <!-- Checkbox & Content -->
+                        <div class="flex items-start gap-3 flex-1 min-w-0">
+                            <input type="checkbox" ${isCompleted ? 'checked' : ''} onclick="toggleTaskComplete('${item.id}')" 
+                                class="custom-checkbox mt-1 flex-shrink-0">
+
+                            <div class="space-y-1 flex-1 min-w-0">
+                                <p class="text-sm sm:text-base font-bold text-slate-800 break-words ${isCompleted ? 'line-through text-slate-400' : ''}">
+                                    ${escapeHtml(item.title)}
+                                </p>
+
+                                <div class="flex flex-wrap items-center gap-2 pt-1 text-xs">
+                                    <!-- Category Pill -->
+                                    <span class="px-2 py-0.5 rounded-lg border border-ceramic bg-cream text-slate-700 font-bold">
+                                        ${escapeHtml(item.category)}
+                                    </span>
+
+                                    <!-- Priority Pill -->
+                                    <span class="px-2 py-0.5 rounded-lg border font-bold ${priorityBadgeClass}">
+                                        ${priorityLabel}
+                                    </span>
+
+                                    <!-- Due Date -->
+                                    ${item.dueDate ? `
+                                        <span class="text-xs text-slate-500 flex items-center gap-1 font-mono">
+                                            <i class="fa-regular fa-clock text-citrus"></i> ${item.dueDate}
+                                        </span>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex items-center gap-1 flex-shrink-0 opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="editTaskTitle('${item.id}', '${escapeHtml(item.title)}')" 
+                                title="編輯" class="w-8 h-8 rounded-lg border-2 border-slate-700 bg-lemon text-slate-800 flex items-center justify-center hover:bg-yellow-300">
+                                <i class="fa-solid fa-pen text-xs"></i>
+                            </button>
+                            <button onclick="deleteTask('${item.id}')" 
+                                title="刪除" class="w-8 h-8 rounded-lg border-2 border-slate-700 bg-rose-200 text-rose-800 flex items-center justify-center hover:bg-rose-300">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
+
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Helper: Escape HTML
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+            });
+        }
+
+        // Statistics Calculator
+        function updateStatistics() {
+            const total = window.todos.length;
+            const completed = window.todos.filter(t => t.completed).length;
+            const pending = total - completed;
+            const highPriority = window.todos.filter(t => t.priority === 'high' && !t.completed).length;
+
+            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            document.getElementById('stat-percentage').innerText = `${percentage}%`;
+            document.getElementById('stat-progress-bar').style.width = `${percentage}%`;
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-pending').innerText = pending;
+            document.getElementById('stat-completed').innerText = completed;
+
+            document.getElementById('count-all').innerText = total;
+            document.getElementById('count-active').innerText = pending;
+            document.getElementById('count-completed').innerText = completed;
+            document.getElementById('count-high').innerText = highPriority;
+        }
+
+        // Passcode Modal Controls
+        window.openPasscodeModal = function() {
+            document.getElementById('passcode-modal').classList.remove('hidden');
+        };
+
+        window.closePasscodeModal = function() {
+            document.getElementById('passcode-modal').classList.add('hidden');
+        };
+
+        window.copyPasscode = function() {
+            const input = document.getElementById('modal-current-passcode');
+            input.select();
+            document.execCommand('copy');
+            showToast("📋 已複製 Passcode 金鑰！", "citrus");
+        };
+
+        window.generateRandomPasscode = function() {
+            const input = document.getElementById('input-new-passcode');
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = 'LEMON-';
+            for (let i = 0; i < 4; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            input.value = code;
+        };
+
+        window.switchPasscode = function() {
+            const input = document.getElementById('input-new-passcode');
+            const passcode = input.value.trim().toUpperCase();
+
+            if (!passcode) {
+                showToast("請輸入有效的 Passcode 金鑰", "citrus");
+                return;
+            }
+
+            window.subscribeToPasscodeChannel(passcode);
+            closePasscodeModal();
+            input.value = '';
+            showToast(`🚀 已切換至頻道：${passcode}`, "lemon");
+        };
+
+        // Status Badge updater
+        function updateSyncBadge(isLive, text) {
+            const badge = document.getElementById('sync-status-badge');
+            const textElem = document.getElementById('sync-status-text');
+            if (badge && textElem) {
+                textElem.innerText = text;
+                const dot = badge.querySelector('span');
+                if (dot) {
+                    dot.className = isLive 
+                        ? "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" 
+                        : "w-2.5 h-2.5 rounded-full bg-amber-500";
+                }
+            }
+        }
+
+        // Toast Messages
+        function showToast(message, theme = "lemon") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+
+            const bgClass = {
+                lemon: 'bg-lemon text-slate-900 border-ceramic',
+                citrus: 'bg-citrus text-white border-slate-900',
+                slate: 'bg-slate-800 text-white border-ceramic'
+            }[theme] || 'bg-white text-slate-800 border-ceramic';
+
+            toast.className = `doodle-card px-4 py-3 text-xs font-bold shadow-pop-dark border-3 ${bgClass} transition-all transform translate-y-2 opacity-0 pointer-events-auto`;
+            toast.innerText = message;
+
+            container.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 200);
+            }, 3000);
+        }
+
+        // Confetti Burst Effect
+        function triggerConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#f8d152', '#f7ab3e', '#5e6cb3', '#2b2d42', '#ffffff'];
+
+            for (let i = 0; i < 40; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 12,
+                    vy: (Math.random() - 0.8) * 12,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    life: 60
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let alive = false;
+
+                particles.forEach(p => {
+                    if (p.life > 0) {
+                        alive = true;
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        p.vy += 0.25; // gravity
+                        p.life--;
+                        ctx.fillStyle = p.color;
+                        ctx.fillRect(p.x, p.y, p.size, p.size);
+                    }
+                });
+
+                if (alive) {
+                    requestAnimationFrame(animate);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+
+            animate();
+        }
+
+        // Initialize view on window load
+        window.onload = function() {
+            renderTodoList();
+        };
+    </script>
+</body>
+</html>
