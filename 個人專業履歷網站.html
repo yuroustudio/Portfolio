@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>陳諭柔 | 運動科技 × 醫療行政協調專業</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter, Plus Jakarta Sans & Noto Sans TC for executive typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;700;800&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            50: '#f0f6ff',
+                            100: '#e0edff',
+                            200: '#bae0ff',
+                            300: '#7cc8ff',
+                            400: '#36a9ff',
+                            500: '#0c87f8',
+                            600: '#0067d7',
+                            700: '#0052b0',
+                            800: '#054591',
+                            900: '#0a3a74',
+                            950: '#07244c',
+                        },
+                        pro: {
+                            bg: '#0f172a',
+                            surface: '#1e293b',
+                            accent: '#38bdf8',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Inter"', '"Noto Sans TC"', 'sans-serif'],
+                        heading: ['"Plus Jakarta Sans"', '"Noto Sans TC"', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.08)',
+                        'glass-dark': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+                        'glow': '0 0 25px -5px rgba(14, 165, 233, 0.4)',
+                        'card-hover': '0 20px 30px -10px rgba(15, 23, 42, 0.12)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Ambient Glow Effects */
+        .ambient-glow {
+            position: absolute;
+            border-radius: 9999px;
+            filter: blur(80px);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* Glassmorphism card effects */
+        .pro-glass {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        html.dark .pro-glass {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.6);
+        }
+
+        /* Card Hover Smoothness */
+        .pro-card {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .pro-card:hover {
+            transform: translateY(-4px);
+        }
+
+        /* Equalizer music pulse animation */
+        @keyframes music-bar {
+            0%, 100% { height: 4px; }
+            50% { height: 16px; }
+        }
+        .music-bar-1 { animation: music-bar 0.8s ease-in-out infinite; }
+        .music-bar-2 { animation: music-bar 0.8s ease-in-out infinite 0.2s; }
+        .music-bar-3 { animation: music-bar 0.8s ease-in-out infinite 0.4s; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-[#0b0f17] dark:text-slate-100 antialiased selection:bg-sky-500 selection:text-white relative overflow-x-hidden">
+
+    <audio id="bg-music" loop src="https://img.ai365.fans/artworks/603e0317-643b-4a0a-a0c4-dbaa9074f6b7/5z5novpncfm.mp3" preload="none"></audio>
+
+    <!-- Background Glow Accents -->
+    <div class="ambient-glow w-96 h-96 bg-sky-300 dark:bg-sky-900 -top-20 -left-20"></div>
+    <div class="ambient-glow w-96 h-96 bg-blue-300 dark:bg-blue-900 top-1/3 -right-20"></div>
+
+    <header class="sticky top-0 z-50 px-4 py-3 sm:px-8">
+        <nav class="max-w-6xl mx-auto pro-glass rounded-2xl px-5 py-3 flex items-center justify-between shadow-glass dark:shadow-glass-dark">
+            <!-- Logo / Name Badge -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-blue-500 flex items-center justify-center font-heading font-bold text-white text-lg shadow-md group-hover:scale-105 transition-transform">
+                    YR
+                </div>
+                <div>
+                    <span class="font-heading font-bold text-base sm:text-lg tracking-tight text-slate-900 dark:text-white block leading-tight">陳諭柔 <span class="text-xs text-sky-600 dark:text-sky-400 font-normal">Yu-Rou Chen</span></span>
+                    <span class="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">運動科技 × 醫療行政協調專家</span>
+                </div>
+            </a>
+
+            <!-- Desktop Links & Switches -->
+            <div class="hidden md:flex items-center gap-6 text-sm font-medium">
+                <a href="#about" class="text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 transition-colors">身份背景</a>
+                <a href="#contributions" class="text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 transition-colors">職責貢獻</a>
+                <a href="#skills" class="text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 transition-colors">專業技能</a>
+                
+                <!-- Music Toggle Button -->
+                <button id="music-btn" onclick="toggleMusic()" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2 transition-all" title="背景音樂">
+                    <i id="music-icon" class="fa-solid fa-music text-sky-500"></i>
+                    <span id="music-text">音樂: 關</span>
+                    <div id="music-bars" class="hidden items-end gap-0.5 h-3.5">
+                        <span class="w-0.5 bg-sky-500 rounded-full music-bar-1"></span>
+                        <span class="w-0.5 bg-sky-500 rounded-full music-bar-2"></span>
+                        <span class="w-0.5 bg-sky-500 rounded-full music-bar-3"></span>
+                    </div>
+                </button>
+
+                <!-- Theme Toggle Button -->
+                <button onclick="toggleTheme()" class="w-9 h-9 rounded-lg border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-amber-300 transition-all" title="切換深淺模式">
+                    <i id="theme-icon" class="fa-solid fa-moon text-sm"></i>
+                </button>
+
+                <a href="#contact" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-medium text-xs sm:text-sm shadow-md hover:shadow-glow transition-all flex items-center gap-2">
+                    <i class="fa-regular fa-paper-plane text-xs"></i> 聯繫專案
+                </a>
+            </div>
+
+            <!-- Mobile Menu Toggle Buttons -->
+            <div class="flex items-center gap-2 md:hidden">
+                <button onclick="toggleTheme()" class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center text-slate-700 dark:text-amber-300">
+                    <i id="mobile-theme-icon" class="fa-solid fa-moon text-sm"></i>
+                </button>
+                <button id="mobile-menu-btn" class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center text-slate-700 dark:text-slate-200">
+                    <i class="fa-solid fa-bars text-base"></i>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobile-drawer" class="hidden md:hidden max-w-6xl mx-auto mt-2 pro-glass rounded-2xl p-4 shadow-glass dark:shadow-glass-dark flex-col gap-3 text-sm font-medium">
+            <a href="#about" class="mobile-link py-2 px-3 rounded-lg hover:bg-sky-50 dark:hover:bg-slate-800 block text-slate-700 dark:text-slate-200">身份背景</a>
+            <a href="#contributions" class="mobile-link py-2 px-3 rounded-lg hover:bg-sky-50 dark:hover:bg-slate-800 block text-slate-700 dark:text-slate-200">職責貢獻</a>
+            <a href="#skills" class="mobile-link py-2 px-3 rounded-lg hover:bg-sky-50 dark:hover:bg-slate-800 block text-slate-700 dark:text-slate-200">專業技能</a>
+            
+            <button onclick="toggleMusic()" class="w-full py-2.5 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200">
+                <i id="mobile-music-icon" class="fa-solid fa-music text-sky-500"></i>
+                <span id="mobile-music-text">背景音樂：開啟 / 暫停</span>
+            </button>
+
+            <a href="#contact" class="mobile-link w-full py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 text-white font-medium text-center text-sm block shadow-sm mt-1">
+                與我聯繫
+            </a>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-8 space-y-20 py-10">
+
+        <!-- Hero Section -->
+        <section id="hero" class="relative pt-4 pb-6 md:py-12">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-10 items-center">
+                <!-- Text Intro (Col 7) -->
+                <div class="md:col-span-7 space-y-6">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800/80 text-sky-700 dark:text-sky-300 text-xs font-semibold tracking-wide shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
+                        5-6 年產業深耕 · 跨域協調與營運統籌專家
+                    </div>
+                    
+                    <h1 class="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight leading-tight text-slate-900 dark:text-white">
+                        將複雜營運需求，<br>
+                        轉化為<span class="bg-gradient-to-r from-sky-600 to-blue-600 bg-clip-text text-transparent">高效率標準化</span>流程。
+                    </h1>
+
+                    <p class="text-slate-600 dark:text-slate-300 text-base sm:text-lg leading-relaxed font-normal">
+                        我是 <strong class="text-slate-900 dark:text-white font-semibold">陳諭柔 (Yu-Rou Chen)</strong>，深耕運動產業營運與醫療行政領域。擅長從第一線服務延伸至後勤流程統籌，在醫師、治療師、教練與學員等多方利害關係人之間發揮強大的溝通協調力與專案落地影響力。
+                    </p>
+
+                    <!-- CTA Actions -->
+                    <div class="pt-2 flex flex-wrap gap-4 items-center">
+                        <a href="#contributions" class="px-6 py-3 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-semibold text-sm shadow-md hover:shadow-glow transition-all flex items-center gap-2">
+                            <span>探索職責貢獻</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </a>
+                        <a href="#skills" class="px-6 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold text-sm transition-all shadow-sm">
+                            專業技能與認證
+                        </a>
+                    </div>
+
+                    <!-- Highlight Key Metrics -->
+                    <div class="grid grid-cols-3 gap-4 pt-6 border-t border-slate-200 dark:border-slate-800">
+                        <div>
+                            <div class="font-heading text-2xl sm:text-3xl font-extrabold text-sky-600 dark:text-sky-400">5-6 年</div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">跨域產業深耕</div>
+                        </div>
+                        <div>
+                            <div class="font-heading text-2xl sm:text-3xl font-extrabold text-sky-600 dark:text-sky-400">100%</div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">診所個案涵蓋率</div>
+                        </div>
+                        <div>
+                            <div class="font-heading text-2xl sm:text-3xl font-extrabold text-sky-600 dark:text-sky-400">雙證照</div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">ACE-CPT & GA</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Executive Portrait Card (Col 5) -->
+                <div class="md:col-span-5 flex justify-center">
+                    <div class="relative w-full max-w-sm">
+                        <!-- Backdrop Soft Glow Ring -->
+                        <div class="absolute -inset-1 bg-gradient-to-r from-sky-500 to-blue-600 rounded-3xl blur-xl opacity-30 dark:opacity-40"></div>
+                        
+                        <!-- Main Card -->
+                        <div class="relative pro-glass rounded-3xl p-6 shadow-xl dark:shadow-2xl flex flex-col items-center text-center space-y-5">
+                            <!-- High-Res Profile Photo Container -->
+                            <div class="relative w-48 h-48 rounded-2xl overflow-hidden shadow-md ring-4 ring-sky-500/20 group">
+                                <img src="https://duk.tw/TGfRqD.jpg" alt="陳諭柔照片" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/400x400/0284c7/ffffff?text=%E9%99%B3%E8%AB%AD%E6%9F%94';">
+                                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent opacity-60"></div>
+                            </div>
+
+                            <div class="space-y-1">
+                                <h3 class="font-heading font-bold text-xl text-slate-900 dark:text-white">陳諭柔 Yu-Rou Chen</h3>
+                                <p class="text-xs font-semibold text-sky-600 dark:text-sky-400">
+                                    跨域整合與溝通樞紐
+                                </p>
+                            </div>
+
+                            <!-- Social Links -->
+                            <div class="flex items-center gap-3 pt-1">
+                                <a href="https://www.linkedin.com/in/yurouchen" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-sky-600 hover:text-white dark:hover:bg-sky-500 transition-all flex items-center justify-center shadow-sm" title="LinkedIn 履歷">
+                                    <i class="fa-brands fa-linkedin-in text-base"></i>
+                                </a>
+                                <a href="https://www.instagram.com/arooooou_0/" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-pink-600 hover:text-white dark:hover:bg-pink-500 transition-all flex items-center justify-center shadow-sm" title="Instagram">
+                                    <i class="fa-brands fa-instagram text-base"></i>
+                                </a>
+                            </div>
+
+                            <!-- Trait Badges -->
+                            <div class="w-full pt-2 flex justify-center gap-2 flex-wrap text-xs font-medium">
+                                <span class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700/80">
+                                    ⚡ 高執行力
+                                </span>
+                                <span class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700/80">
+                                    📊 數據導向
+                                </span>
+                                <span class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700/80">
+                                    🤝 跨域協調
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="scroll-mt-28 space-y-6">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-sky-600 text-white flex items-center justify-center font-heading font-bold text-xs">
+                    01
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-heading font-bold text-slate-900 dark:text-white">身份背景 <span class="text-xs font-normal text-slate-400 uppercase tracking-widest ml-2">/ Background</span></h2>
+            </div>
+
+            <div class="pro-glass rounded-3xl p-6 sm:p-8 shadow-glass dark:shadow-glass-dark pro-card">
+                <p class="text-base sm:text-lg text-slate-700 dark:text-slate-300 leading-relaxed font-normal">
+                    深耕<strong class="text-sky-700 dark:text-sky-300 font-semibold">運動產業營運</strong>與<strong class="text-sky-700 dark:text-sky-300 font-semibold">醫療行政領域 5-6 年</strong>，具備從第一線服務到後勤流程統籌的完整實戰經驗。擅長在多方利害關係人之間進行資源協調與專案執行，是能將複雜營運需求轉化為可執行流程的實務型人才。
+                </p>
+
+                <!-- Core Pillars Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 mt-6 border-t border-slate-200/80 dark:border-slate-800">
+                    <div class="space-y-2">
+                        <div class="w-10 h-10 rounded-xl bg-sky-100 dark:bg-sky-950/80 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-handshake"></i>
+                        </div>
+                        <h3 class="font-heading font-bold text-base text-slate-900 dark:text-white">多方資源協調</h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            穿梭於醫師、治療師、教練與學員之間，精準理解各方訴求並搭起順暢溝通橋樑。
+                        </p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-diagram-project"></i>
+                        </div>
+                        <h3 class="font-heading font-bold text-base text-slate-900 dark:text-white">流程模組落地</h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            將複雜且多線進行的營運需求，梳理為標準化、模組化且高效運作的行政機制。
+                        </p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <h3 class="font-heading font-bold text-base text-slate-900 dark:text-white">數據輔助決策</h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            結合專業證照知識（ACE-CPT）與數據思維（GA），以實務與成效導向優化服務品質。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contributions" class="scroll-mt-28 space-y-6">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-sky-600 text-white flex items-center justify-center font-heading font-bold text-xs">
+                    02
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-heading font-bold text-slate-900 dark:text-white">職責貢獻 <span class="text-xs font-normal text-slate-400 uppercase tracking-widest ml-2">/ Responsibilities</span></h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                <!-- Experience Card 1 -->
+                <div class="pro-glass rounded-3xl p-7 shadow-glass dark:shadow-glass-dark pro-card flex flex-col justify-between border-l-4 border-l-sky-500">
+                    <div class="space-y-5">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <span class="px-3 py-1 rounded-full bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 text-xs font-semibold">
+                                    運動產業 · 行政與專案統籌
+                                </span>
+                                <h3 class="text-xl font-heading font-bold text-slate-900 dark:text-white mt-2">運動中心 課程專案與行政管理</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-sky-50 dark:bg-slate-800 flex-shrink-0 flex items-center justify-center text-sky-600 text-xl font-bold border border-sky-100 dark:border-slate-700">
+                                <i class="fa-solid fa-dumbbell"></i>
+                            </div>
+                        </div>
+
+                        <div class="text-xs font-semibold uppercase tracking-wider text-sky-600 dark:text-sky-400 border-b border-slate-200 dark:border-slate-800 pb-2">
+                            專案時程與範疇管理（Timeline & Scope Management）
+                        </div>
+
+                        <ul class="space-y-3 text-sm text-slate-600 dark:text-slate-300">
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-circle-check text-sky-500 mt-1 flex-shrink-0"></i>
+                                <span><strong>多線作業統籌：</strong>負責學員報名、即時點名、結帳核對等多項行政流程，建立標準運作機制。</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-circle-check text-sky-500 mt-1 flex-shrink-0"></i>
+                                <span><strong>多專案平行掌控：</strong>確保多堂課程同步高效運作，展現高強度的時程管控能力與應變機制。</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-circle-check text-sky-500 mt-1 flex-shrink-0"></i>
+                                <span><strong>零失誤高品質交付：</strong>落實場館現場營運與後勤支援，給予學員與教練順暢無縫的體驗。</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-200/80 dark:border-slate-800/80 flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                        <i class="fa-solid fa-circle-info text-sky-500"></i>
+                        <span>核心成果：實現多課程專案零失誤運行，提升整體行政滿意度與營運效益。</span>
+                    </div>
+                </div>
+
+                <!-- Experience Card 2 -->
+                <div class="pro-glass rounded-3xl p-7 shadow-glass dark:shadow-glass-dark pro-card flex flex-col justify-between border-l-4 border-l-indigo-500">
+                    <div class="space-y-5">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <span class="px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-xs font-semibold">
+                                    醫療行政 · 個案管理
+                                </span>
+                                <h3 class="text-xl font-heading font-bold text-slate-900 dark:text-white mt-2">物理治療所 個案管理師</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-slate-800 flex-shrink-0 flex items-center justify-center text-indigo-600 text-xl font-bold border border-indigo-100 dark:border-slate-700">
+                                <i class="fa-solid fa-user-doctor"></i>
+                            </div>
+                        </div>
+
+                        <div class="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 border-b border-slate-200 dark:border-slate-800 pb-2">
+                            利害關係人溝通與 CRM 管理（Stakeholder & CRM Management）
+                        </div>
+
+                        <ul class="space-y-3 text-sm text-slate-600 dark:text-slate-300">
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-circle-check text-indigo-500 mt-1 flex-shrink-0"></i>
+                                <span><strong>三方溝通樞紐：</strong>完美對接「醫師、治療師、患者」需求，主導 CRM 系統運作與門診預約分流。</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-circle-check text-indigo-500 mt-1 flex-shrink-0"></i>
+                                <span><strong>全涵蓋個案服務：</strong>於兩年內服務涵蓋診所內幾乎全數個案，建立極高客戶信任感。</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-circle-check text-indigo-500 mt-1 flex-shrink-0"></i>
+                                <span><strong>數據化思維排程：</strong>結合 Google Analytics 分析邏輯，優化醫療資源配置與治療排程。</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-200/80 dark:border-slate-800/80 flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                        <i class="fa-solid fa-circle-info text-indigo-500"></i>
+                        <span>核心成果：服務涵蓋全所個案，運用數據化排程維持高度個案滿意度。</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="skills" class="scroll-mt-28 space-y-6">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-sky-600 text-white flex items-center justify-center font-heading font-bold text-xs">
+                    03
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-heading font-bold text-slate-900 dark:text-white">專業技能與證照 <span class="text-xs font-normal text-slate-400 uppercase tracking-widest ml-2">/ Professional Skills</span></h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- Skill Card 1 -->
+                <div class="pro-glass rounded-2xl p-6 pro-card space-y-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-chart-pie"></i>
+                        </div>
+                        <h3 class="font-heading font-bold text-slate-900 dark:text-white">數據與工具應用</h3>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300">
+                            <span>Google Analytics (GA)</span>
+                            <span class="bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 px-2.5 py-0.5 rounded-full text-[11px]">個人認證</span>
+                        </div>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            具備以數據輔助決策的實務能力，運用關鍵數據指標優化個案服務與營運流程。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Skill Card 2 -->
+                <div class="pro-glass rounded-2xl p-6 pro-card space-y-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-list-check"></i>
+                        </div>
+                        <h3 class="font-heading font-bold text-slate-900 dark:text-white">專案執行力</h3>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex flex-wrap gap-1.5">
+                            <span class="text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md">多任務並行</span>
+                            <span class="text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md">流程標準化</span>
+                            <span class="text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md">範疇管控</span>
+                        </div>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            精準掌控專案範疇與時間節點，將複雜需求化為可被驗收與高執行的工作流。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Skill Card 3 -->
+                <div class="pro-glass rounded-2xl p-6 pro-card space-y-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-comments"></i>
+                        </div>
+                        <h3 class="font-heading font-bold text-slate-900 dark:text-white">利害關係人管理</h3>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex flex-wrap gap-1.5">
+                            <span class="text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md">跨部門溝通</span>
+                            <span class="text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md">危機應變</span>
+                            <span class="text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md">需求轉譯</span>
+                        </div>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            擔任跨領域運作的專業橋樑，迅速轉譯專業術語，消除臨床與營運端的資訊落差。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Skill Card 4 -->
+                <div class="pro-glass rounded-2xl p-6 pro-card space-y-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-certificate"></i>
+                        </div>
+                        <h3 class="font-heading font-bold text-slate-900 dark:text-white">產業專業度</h3>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300">
+                            <span>ACE-CPT 運動教練證照</span>
+                            <span class="bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 px-2.5 py-0.5 rounded-full text-[11px]">國際證照</span>
+                        </div>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            深諳體育與健身產業運作邏輯，能以專業語言與第一線教練建立深刻溝通。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Skill Card 5 -->
+                <div class="pro-glass rounded-2xl p-6 pro-card space-y-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-earth-americas"></i>
+                        </div>
+                        <h3 class="font-heading font-bold text-slate-900 dark:text-white">國際溝通能力</h3>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300">
+                            <span>TOEIC 多益測驗</span>
+                            <span class="bg-blue-100 dark:bg-blue-900/60 text-blue-800 dark:text-blue-300 px-2.5 py-0.5 rounded-full text-[11px]">基礎英語</span>
+                        </div>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            具備基礎英文書信溝通與文件閱讀能力，適應跨國資訊檢索與溝通需求。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Skill Card 6: Core Traits -->
+                <div class="bg-gradient-to-br from-slate-900 to-sky-950 text-white rounded-2xl p-6 pro-card space-y-3 shadow-lg border border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-sky-500/20 border border-sky-400/30 text-sky-400 flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-gem"></i>
+                        </div>
+                        <h3 class="font-heading font-bold text-white">核心個人特質</h3>
+                    </div>
+                    <div class="space-y-2 text-xs">
+                        <div class="flex items-center gap-2 font-medium bg-white/5 p-2 rounded-lg border border-white/10">
+                            <i class="fa-solid fa-brain text-sky-400"></i> 邏輯清晰：迅速梳理複雜營運架構
+                        </div>
+                        <div class="flex items-center gap-2 font-medium bg-white/5 p-2 rounded-lg border border-white/10">
+                            <i class="fa-solid fa-shield-halved text-sky-400"></i> 抗壓應變：沉著協調突發個案需求
+                        </div>
+                        <div class="flex items-center gap-2 font-medium bg-white/5 p-2 rounded-lg border border-white/10">
+                            <i class="fa-solid fa-clock-rotate-left text-sky-400"></i> 自律高效：零失誤高品質完成任務
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="contact" class="scroll-mt-28">
+            <div class="pro-glass rounded-3xl p-8 sm:p-12 text-center space-y-6 relative overflow-hidden shadow-xl dark:shadow-2xl border border-sky-100 dark:border-slate-800">
+                <!-- Background Accent Glow -->
+                <div class="ambient-glow w-64 h-64 bg-sky-400/20 dark:bg-sky-600/10 -top-10 -right-10"></div>
+
+                <div class="relative z-10 max-w-2xl mx-auto space-y-4">
+                    <div class="inline-block px-3.5 py-1 rounded-full bg-sky-50 dark:bg-sky-950 text-xs font-semibold text-sky-600 dark:text-sky-400 uppercase tracking-widest">
+                        LET'S CONNECT
+                    </div>
+
+                    <h2 class="text-3xl sm:text-4xl font-heading font-extrabold text-slate-900 dark:text-white tracking-tight">
+                        尋找具備跨域協調力的專案夥伴？
+                    </h2>
+
+                    <p class="text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed">
+                        無論是運動科技專案落地、醫療行政流程優化，或是跨部門團隊資源協調，歡迎隨時與我聯繫交流！
+                    </p>
+
+                    <!-- Contact Actions -->
+                    <div class="pt-4 flex flex-wrap gap-4 justify-center items-center">
+                        <button onclick="copyToClipboard('yurou.chen.contact@gmail.com', '電子信箱已複製！')" class="px-6 py-3 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-semibold text-sm shadow-md hover:shadow-glow transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-envelope"></i>
+                            <span>複製 Email 信箱</span>
+                        </button>
+                        <a href="https://www.linkedin.com/in/yurouchen" target="_blank" rel="noopener noreferrer" class="px-6 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold text-sm transition-all flex items-center gap-2 shadow-sm">
+                            <i class="fa-brands fa-linkedin text-sky-600"></i>
+                            <span>LinkedIn 履歷</span>
+                        </a>
+                        <a href="https://www.instagram.com/arooooou_0/" target="_blank" rel="noopener noreferrer" class="px-6 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold text-sm transition-all flex items-center gap-2 shadow-sm">
+                            <i class="fa-brands fa-instagram text-pink-500"></i>
+                            <span>Instagram</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="max-w-6xl mx-auto px-4 sm:px-8 py-8 text-center text-xs text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-slate-800/80 mt-16 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+            © 2026 陳諭柔 Yu-Rou Chen. All rights reserved.
+        </div>
+        <div class="flex items-center gap-5">
+            <a href="https://www.linkedin.com/in/yurouchen" target="_blank" rel="noopener noreferrer" class="hover:text-sky-600 dark:hover:text-sky-400 transition-colors flex items-center gap-1.5 font-medium">
+                <i class="fa-brands fa-linkedin"></i> LinkedIn
+            </a>
+            <a href="https://www.instagram.com/arooooou_0/" target="_blank" rel="noopener noreferrer" class="hover:text-pink-500 dark:hover:text-pink-400 transition-colors flex items-center gap-1.5 font-medium">
+                <i class="fa-brands fa-instagram"></i> Instagram
+            </a>
+        </div>
+    </footer>
+
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 font-semibold text-sm border border-slate-800 dark:border-slate-200">
+            <div class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs">
+                <i id="toast-icon" class="fa-solid fa-check"></i>
+            </div>
+            <span id="toast-message">已成功複製！</span>
+        </div>
+    </div>
+
+    <script>
+        // Mobile Navigation Drawer Toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileDrawer = document.getElementById('mobile-drawer');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileDrawer.classList.toggle('hidden');
+            mobileDrawer.classList.toggle('flex');
+        });
+
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileDrawer.classList.add('hidden');
+                mobileDrawer.classList.remove('flex');
+            });
+        });
+
+        // Background Music Toggle
+        const bgMusic = document.getElementById('bg-music');
+        let isMusicPlaying = false;
+
+        function toggleMusic() {
+            const musicIcon = document.getElementById('music-icon');
+            const musicText = document.getElementById('music-text');
+            const musicBars = document.getElementById('music-bars');
+            const mobileMusicIcon = document.getElementById('mobile-music-icon');
+
+            if (!isMusicPlaying) {
+                bgMusic.play().then(() => {
+                    isMusicPlaying = true;
+                    musicIcon.className = "fa-solid fa-volume-high text-emerald-500";
+                    musicText.innerText = "音樂: 開";
+                    musicBars.classList.remove('hidden');
+                    musicBars.classList.add('flex');
+                    if (mobileMusicIcon) mobileMusicIcon.className = "fa-solid fa-volume-high text-emerald-500";
+                    showToast('🎶 背景音樂已播放');
+                }).catch(() => {
+                    showToast('⚠️ 請允許瀏覽器音訊播放');
+                });
+            } else {
+                bgMusic.pause();
+                isMusicPlaying = false;
+                musicIcon.className = "fa-solid fa-music text-sky-500";
+                musicText.innerText = "音樂: 關";
+                musicBars.classList.add('hidden');
+                musicBars.classList.remove('flex');
+                if (mobileMusicIcon) mobileMusicIcon.className = "fa-solid fa-music text-sky-500";
+                showToast('🔇 背景音樂已暫停');
+            }
+        }
+
+        // Theme Toggle (Light / Dark)
+        function toggleTheme() {
+            const html = document.documentElement;
+            const themeIcon = document.getElementById('theme-icon');
+            const mobileThemeIcon = document.getElementById('mobile-theme-icon');
+
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                themeIcon.className = "fa-solid fa-moon text-sm";
+                if (mobileThemeIcon) mobileThemeIcon.className = "fa-solid fa-moon text-sm";
+                showToast('☀️ 已切換至明亮模式');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                themeIcon.className = "fa-solid fa-sun text-amber-300 text-sm";
+                if (mobileThemeIcon) mobileThemeIcon.className = "fa-solid fa-sun text-amber-300 text-sm";
+                showToast('🌙 已切換至深色模式');
+            }
+        }
+
+        // Initialize Theme
+        (function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const themeIcon = document.getElementById('theme-icon');
+            const mobileThemeIcon = document.getElementById('mobile-theme-icon');
+
+            if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                document.documentElement.classList.add('dark');
+                if (themeIcon) themeIcon.className = "fa-solid fa-sun text-amber-300 text-sm";
+                if (mobileThemeIcon) mobileThemeIcon.className = "fa-solid fa-sun text-amber-300 text-sm";
+            }
+        })();
+
+        // Notification Toast Handler
+        let toastTimeout;
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.innerText = message;
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        }
+
+        // Copy to Clipboard
+        function copyToClipboard(text, successMessage) {
+            const tempInput = document.createElement('textarea');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            showToast(successMessage);
+        }
+    </script>
+</body>
+</html>

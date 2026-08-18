@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Northern Hydro - 每日飲水統計與記錄</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,600;0,800;1,400&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: {
+                            50: '#fcfaf5',
+                            100: '#f5f1e8',
+                            200: '#ece5d8',
+                            300: '#dfd5c3',
+                        },
+                        nordic: {
+                            blue: '#466d98',
+                            dark: '#274363',
+                            light: '#cad8e6',
+                            soft: '#9cb5d1',
+                            deep: '#1b2f47',
+                            text: '#202b38'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', '"Noto Sans TC"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #ede7dc;
+            color: #202b38;
+            font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif;
+            background-image: radial-gradient(#d6cdbc 0.75px, transparent 0.75px);
+            background-size: 16px 16px;
+        }
+
+        /* Poster Grain Overlay */
+        .poster-grain {
+            position: relative;
+        }
+        .poster-grain::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.035;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            z-index: 10;
+        }
+
+        /* Starburst SVG icon styling */
+        .starburst {
+            display: inline-block;
+            fill: currentColor;
+        }
+
+        /* Custom Wave Flask Animation Canvas Container */
+        .wave-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 2rem;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.08), 0 10px 25px -5px rgba(39, 67, 99, 0.15);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #e6dfd3;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #9cb5d1;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #466d98;
+        }
+
+        /* Poster typography styling */
+        .poster-title {
+            letter-spacing: -0.04em;
+            font-weight: 800;
+        }
+    </style>
+</head>
+<body class="min-h-screen poster-grain flex flex-col justify-between p-3 md:p-6 text-nordic-text selection:bg-nordic-blue selection:text-white">
+
+    <!-- Top Metadata Bar (Poster aesthetic matching top header) -->
+    <header class="max-w-5xl mx-auto w-full pt-2 pb-4 border-b border-nordic-blue/20">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs uppercase tracking-wider text-nordic-dark/70 font-mono mb-3">
+            <div class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-nordic-blue starburst" viewBox="0 0 24 24">
+                    <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5L12 0Z"/>
+                </svg>
+                <span>Sense - <strong class="text-nordic-blue font-semibold">Pure</strong></span>
+            </div>
+            <div>Tone - <strong class="text-nordic-blue font-semibold">Hydro</strong></div>
+            <div>Poster - <strong class="text-nordic-blue font-semibold">NO. 088</strong></div>
+            <div class="text-right sm:text-left flex items-center justify-end sm:justify-start gap-1">
+                <span>Mode - <strong class="text-nordic-blue font-semibold">Daily</strong></span>
+                <svg class="w-3.5 h-3.5 text-nordic-blue starburst hidden sm:inline-block ml-auto" viewBox="0 0 24 24">
+                    <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5L12 0Z"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Main Title Header -->
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mt-2">
+            <div>
+                <h1 class="text-5xl sm:text-7xl lg:text-8xl poster-title text-nordic-blue lowercase tracking-tight leading-none select-none">
+                    hydration
+                </h1>
+                <p class="text-xs sm:text-sm font-mono tracking-widest text-nordic-dark/60 mt-1 uppercase">
+                    A passage for body, mind, and daily balance — <span id="current-date-str">August 2026</span>
+                </p>
+            </div>
+            
+            <div class="flex items-center gap-2 self-start md:self-end">
+                <button onclick="openGoalModal()" class="px-3.5 py-1.5 text-xs font-mono font-medium rounded-full border border-nordic-blue/30 text-nordic-dark hover:bg-nordic-blue hover:text-white transition-all duration-200 flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>目標: <span id="header-goal-display">2000</span> ml</span>
+                </button>
+                <button onclick="toggleReminderModal()" id="reminder-btn" class="px-3.5 py-1.5 text-xs font-mono font-medium rounded-full border border-nordic-blue/30 text-nordic-dark hover:bg-nordic-blue hover:text-white transition-all duration-200 flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-bell"></i>
+                    <span id="reminder-status-text">提醒: 關閉</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="max-w-5xl mx-auto w-full my-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- LEFT COLUMN: Flask Visualization & Quick Actions -->
+        <section class="lg:col-span-5 flex flex-col gap-5">
+            
+            <!-- Hydration Wave Visual Card -->
+            <div class="bg-cream-100 border border-nordic-blue/20 rounded-2xl p-6 shadow-sm flex flex-col items-center text-center relative">
+                <div class="w-full flex justify-between items-center text-xs font-mono text-nordic-dark/60 mb-2">
+                    <span>TODAY'S INTAKE</span>
+                    <span id="intake-percentage-badge" class="bg-nordic-blue text-cream-50 font-semibold px-2 py-0.5 rounded-full">0%</span>
+                </div>
+
+                <!-- Canvas Wave Container -->
+                <div class="wave-container w-48 h-64 sm:w-56 sm:h-72 my-2 border-4 border-cream-200 bg-cream-50 relative flex items-center justify-center">
+                    <canvas id="water-wave-canvas" class="absolute inset-0 w-full h-full"></canvas>
+                    
+                    <!-- Overlay Text inside Water Vessel -->
+                    <div class="relative z-10 flex flex-col items-center pointer-events-none drop-shadow-md text-nordic-deep">
+                        <span id="current-intake-amount" class="text-4xl sm:text-5xl font-extrabold tracking-tight">0</span>
+                        <span class="text-xs font-mono uppercase tracking-widest text-nordic-dark/80 mt-0.5">/ <span id="goal-intake-amount">2000</span> ml</span>
+                    </div>
+                </div>
+
+                <p id="hydration-status-quote" class="text-xs font-mono text-nordic-dark/70 mt-3 italic">
+                    "A journey of two liters starts with a single sip."
+                </p>
+
+                <!-- Beverage Selector Pills -->
+                <div class="w-full mt-4 pt-4 border-t border-nordic-blue/15">
+                    <div class="text-xs font-mono text-left text-nordic-dark/60 uppercase mb-2">選擇飲品類型 (TYPE)</div>
+                    <div class="grid grid-cols-4 gap-1.5 text-xs font-medium" id="beverage-type-selector">
+                        <button onclick="selectBeverage('water', this)" class="bev-btn active p-2 rounded-xl border border-nordic-blue bg-nordic-blue text-white flex flex-col items-center gap-1 transition-all">
+                            <i class="fa-solid fa-glass-water"></i>
+                            <span class="text-[10px]">白開水</span>
+                        </button>
+                        <button onclick="selectBeverage('tea', this)" class="bev-btn p-2 rounded-xl border border-nordic-blue/30 bg-cream-50 text-nordic-dark hover:border-nordic-blue flex flex-col items-center gap-1 transition-all">
+                            <i class="fa-solid fa-mug-hot"></i>
+                            <span class="text-[10px]">茶飲</span>
+                        </button>
+                        <button onclick="selectBeverage('coffee', this)" class="bev-btn p-2 rounded-xl border border-nordic-blue/30 bg-cream-50 text-nordic-dark hover:border-nordic-blue flex flex-col items-center gap-1 transition-all">
+                            <i class="fa-solid fa-coffee"></i>
+                            <span class="text-[10px]">咖啡</span>
+                        </button>
+                        <button onclick="selectBeverage('sparkling', this)" class="bev-btn p-2 rounded-xl border border-nordic-blue/30 bg-cream-50 text-nordic-dark hover:border-nordic-blue flex flex-col items-center gap-1 transition-all">
+                            <i class="fa-solid fa-bottle-water"></i>
+                            <span class="text-[10px]">氣泡水</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Add Action Grid -->
+                <div class="w-full mt-4">
+                    <div class="text-xs font-mono text-left text-nordic-dark/60 uppercase mb-2">快速新增喝水量 (QUICK ADD)</div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="addWater(100)" class="py-2.5 px-2 bg-nordic-blue text-white rounded-xl font-mono text-sm font-semibold shadow hover:bg-nordic-dark active:scale-95 transition-all">
+                            +100 ml
+                        </button>
+                        <button onclick="addWater(250)" class="py-2.5 px-2 bg-nordic-blue text-white rounded-xl font-mono text-sm font-semibold shadow hover:bg-nordic-dark active:scale-95 transition-all">
+                            +250 ml
+                        </button>
+                        <button onclick="addWater(500)" class="py-2.5 px-2 bg-nordic-blue text-white rounded-xl font-mono text-sm font-semibold shadow hover:bg-nordic-dark active:scale-95 transition-all">
+                            +500 ml
+                        </button>
+                    </div>
+
+                    <!-- Custom Input Row -->
+                    <div class="flex gap-2 mt-2">
+                        <div class="relative flex-1">
+                            <input type="number" id="custom-water-input" placeholder="自訂毫升 (ml)" min="10" max="2000" step="10" 
+                                   class="w-full bg-cream-50 border border-nordic-blue/30 rounded-xl px-3 py-2 text-sm font-mono text-nordic-dark focus:outline-none focus:border-nordic-blue">
+                            <span class="absolute right-3 top-2.5 text-xs text-nordic-dark/40 font-mono">ML</span>
+                        </div>
+                        <button onclick="addCustomWater()" class="px-4 py-2 bg-nordic-dark text-cream-50 rounded-xl text-xs font-semibold uppercase tracking-wider hover:bg-nordic-blue active:scale-95 transition-all">
+                            記錄
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- RIGHT COLUMN: Analytics, Stats & History Logs -->
+        <section class="lg:col-span-7 flex flex-col gap-5">
+            
+            <!-- Quick Key Metrics Cards -->
+            <div class="grid grid-cols-3 gap-3">
+                <div class="bg-cream-100 border border-nordic-blue/20 rounded-2xl p-4 flex flex-col items-start shadow-sm">
+                    <span class="text-[11px] font-mono uppercase text-nordic-dark/60">連續達成 (STREAK)</span>
+                    <div class="flex items-baseline gap-1 mt-1">
+                        <span id="streak-count" class="text-2xl sm:text-3xl font-extrabold text-nordic-blue">0</span>
+                        <span class="text-xs font-medium text-nordic-dark/70">天</span>
+                    </div>
+                </div>
+
+                <div class="bg-cream-100 border border-nordic-blue/20 rounded-2xl p-4 flex flex-col items-start shadow-sm">
+                    <span class="text-[11px] font-mono uppercase text-nordic-dark/60">今日剩餘 (REMAINING)</span>
+                    <div class="flex items-baseline gap-1 mt-1">
+                        <span id="remaining-amount" class="text-2xl sm:text-3xl font-extrabold text-nordic-blue">2000</span>
+                        <span class="text-xs font-medium text-nordic-dark/70">ml</span>
+                    </div>
+                </div>
+
+                <div class="bg-cream-100 border border-nordic-blue/20 rounded-2xl p-4 flex flex-col items-start shadow-sm">
+                    <span class="text-[11px] font-mono uppercase text-nordic-dark/60">次數 (ENTRIES)</span>
+                    <div class="flex items-baseline gap-1 mt-1">
+                        <span id="today-count" class="text-2xl sm:text-3xl font-extrabold text-nordic-blue">0</span>
+                        <span class="text-xs font-medium text-nordic-dark/70">次</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly Intake Visual Chart Card -->
+            <div class="bg-cream-100 border border-nordic-blue/20 rounded-2xl p-5 shadow-sm">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-xs font-mono font-semibold uppercase text-nordic-dark tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-chart-simple text-nordic-blue"></i>
+                        <span>近7日喝水趨勢 (WEEKLY SUMMARY)</span>
+                    </h3>
+                    <span id="weekly-avg-label" class="text-xs font-mono text-nordic-dark/60">日均: 0 ml</span>
+                </div>
+                <div class="h-44 w-full">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Today's Intake Log Timeline Card -->
+            <div class="bg-cream-100 border border-nordic-blue/20 rounded-2xl p-5 shadow-sm flex flex-col flex-1">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-xs font-mono font-semibold uppercase text-nordic-dark tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-clock-rotate-left text-nordic-blue"></i>
+                        <span>今日飲水時間軸 (TIMELINE)</span>
+                    </h3>
+                    <button onclick="confirmResetToday()" class="text-[11px] font-mono text-nordic-dark/50 hover:text-red-600 transition-colors">
+                        <i class="fa-regular fa-trash-can mr-0.5"></i> 清空今日
+                    </button>
+                </div>
+
+                <!-- Timeline List -->
+                <div id="logs-container" class="space-y-2.5 max-h-64 overflow-y-auto pr-1 custom-scrollbar flex-1">
+                    <!-- Dynamic Log items inserted here -->
+                </div>
+
+                <!-- Empty state fallback -->
+                <div id="empty-logs-msg" class="py-8 text-center text-nordic-dark/50 font-mono text-xs flex flex-col items-center gap-2">
+                    <i class="fa-solid fa-droplet text-nordic-blue/30 text-2xl"></i>
+                    <span>今天尚未記錄任何飲水，點擊左側按鈕開始記錄吧！</span>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Bottom Editorial Footer Poster Quote -->
+    <footer class="max-w-5xl mx-auto w-full pt-4 border-t border-nordic-blue/20 mt-4 text-center sm:text-left flex flex-col sm:flex-row justify-between items-center gap-2 text-xs font-mono text-nordic-dark/60">
+        <div class="flex items-center gap-2">
+            <svg class="w-3.5 h-3.5 text-nordic-blue starburst" viewBox="0 0 24 24">
+                <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5L12 0Z"/>
+            </svg>
+            <span>A passage lost between sky and tide — August 1966 — Western Horizon</span>
+        </div>
+        <div>
+            <span>DESIGNED WITH NORDIC SOFT PALETTE</span>
+        </div>
+    </footer>
+
+    <!-- Custom Modal for Setting Goal -->
+    <div id="goal-modal" class="fixed inset-0 bg-nordic-deep/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-cream-100 border border-nordic-blue/30 rounded-2xl max-w-sm w-full p-6 shadow-2xl relative animate-fade-in">
+            <div class="flex justify-between items-center mb-4 border-b border-nordic-blue/15 pb-2">
+                <h3 class="font-mono text-sm font-bold text-nordic-dark uppercase">設定每日目標 (DAILY GOAL)</h3>
+                <button onclick="closeGoalModal()" class="text-nordic-dark/50 hover:text-nordic-dark text-lg">&times;</button>
+            </div>
+            <p class="text-xs text-nordic-dark/70 mb-4">建議一般成年人每日飲水量為 2000 - 2500 ml，可根據體重與運動量調整。</p>
+            
+            <div class="space-y-3 mb-6">
+                <label class="block text-xs font-mono text-nordic-dark/80">目標水量 (ML)</label>
+                <input type="number" id="goal-modal-input" min="500" max="6000" step="100" class="w-full bg-cream-50 border border-nordic-blue/30 rounded-xl px-4 py-2.5 font-mono text-lg font-bold text-nordic-blue focus:outline-none focus:border-nordic-blue">
+                
+                <div class="flex gap-2 pt-1">
+                    <button onclick="setModalGoalValue(1800)" class="flex-1 py-1 px-2 text-xs font-mono border border-nordic-blue/20 rounded-lg hover:bg-nordic-blue/10">1800 ml</button>
+                    <button onclick="setModalGoalValue(2000)" class="flex-1 py-1 px-2 text-xs font-mono border border-nordic-blue/20 rounded-lg hover:bg-nordic-blue/10">2000 ml</button>
+                    <button onclick="setModalGoalValue(2500)" class="flex-1 py-1 px-2 text-xs font-mono border border-nordic-blue/20 rounded-lg hover:bg-nordic-blue/10">2500 ml</button>
+                    <button onclick="setModalGoalValue(3000)" class="flex-1 py-1 px-2 text-xs font-mono border border-nordic-blue/20 rounded-lg hover:bg-nordic-blue/10">3000 ml</button>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="closeGoalModal()" class="flex-1 py-2 rounded-xl border border-nordic-blue/30 text-xs font-semibold text-nordic-dark hover:bg-cream-200">取消</button>
+                <button onclick="saveNewGoal()" class="flex-1 py-2 rounded-xl bg-nordic-blue text-white text-xs font-semibold shadow hover:bg-nordic-dark">儲存設定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal for Confirmation Dialog (No native alert/confirm) -->
+    <div id="confirm-modal" class="fixed inset-0 bg-nordic-deep/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-cream-100 border border-nordic-blue/30 rounded-2xl max-w-sm w-full p-6 shadow-2xl relative">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-3 text-lg">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <h3 class="font-bold text-nordic-dark text-base mb-1" id="confirm-modal-title">確定重設？</h3>
+                <p class="text-xs text-nordic-dark/70 mb-5" id="confirm-modal-msg">將清除今天的全部飲水紀錄，此操作無法復原。</p>
+                <div class="flex gap-3">
+                    <button onclick="closeConfirmModal()" class="flex-1 py-2 rounded-xl border border-nordic-blue/30 text-xs font-semibold text-nordic-dark hover:bg-cream-200">取消</button>
+                    <button id="confirm-modal-action-btn" class="flex-1 py-2 rounded-xl bg-red-600 text-white text-xs font-semibold shadow hover:bg-red-700">確定清除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reminder Settings Modal -->
+    <div id="reminder-modal" class="fixed inset-0 bg-nordic-deep/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-cream-100 border border-nordic-blue/30 rounded-2xl max-w-sm w-full p-6 shadow-2xl relative">
+            <div class="flex justify-between items-center mb-4 border-b border-nordic-blue/15 pb-2">
+                <h3 class="font-mono text-sm font-bold text-nordic-dark uppercase">定時飲水提醒 (REMINDER)</h3>
+                <button onclick="toggleReminderModal()" class="text-nordic-dark/50 hover:text-nordic-dark text-lg">&times;</button>
+            </div>
+            <p class="text-xs text-nordic-dark/70 mb-4">啟用後，系統將在開啟網頁期間定期提示您補充水分。</p>
+
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="block text-xs font-mono text-nordic-dark/80 mb-1">提醒間隔時間</label>
+                    <select id="reminder-interval-select" class="w-full bg-cream-50 border border-nordic-blue/30 rounded-xl px-3 py-2 text-sm font-mono text-nordic-dark">
+                        <option value="30">每 30 分鐘</option>
+                        <option value="45">每 45 分鐘</option>
+                        <option value="60" selected>每 1 小時</option>
+                        <option value="90">每 1.5 小時</option>
+                        <option value="120">每 2 小時</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="disableReminder()" class="flex-1 py-2 rounded-xl border border-nordic-blue/30 text-xs font-semibold text-nordic-dark hover:bg-cream-200">關閉提醒</button>
+                <button onclick="enableReminder()" class="flex-1 py-2 rounded-xl bg-nordic-blue text-white text-xs font-semibold shadow hover:bg-nordic-dark">啟動提醒</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Banner -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 max-w-xs bg-nordic-dark text-cream-50 text-xs font-mono px-4 py-3 rounded-xl shadow-xl transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2 pointer-events-none">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-nordic-light"></i>
+        <span id="toast-message">飲水記錄已更新！</span>
+    </div>
+
+    <!-- Application Logic Script -->
+    <script>
+        // State Management
+        let appState = {
+            goal: 2000, // ml
+            currentBeverage: 'water',
+            todayLogs: [], // { id, amount, beverage, typeName, time }
+            history: {}, // { 'YYYY-MM-DD': totalAmount }
+            reminderActive: false,
+            reminderInterval: 60, // minutes
+            reminderTimer: null
+        };
+
+        const beverageMeta = {
+            water: { name: '白開水', icon: 'fa-glass-water', color: '#466d98' },
+            tea: { name: '茶飲', icon: 'fa-mug-hot', color: '#62835a' },
+            coffee: { name: '咖啡', icon: 'fa-coffee', color: '#825f48' },
+            sparkling: { name: '氣泡水', icon: 'fa-bottle-water', color: '#3f7c9e' }
+        };
+
+        // Date helper
+        function getTodayKey() {
+            const today = new Date();
+            return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        }
+
+        // Initialize App
+        window.addEventListener('load', () => {
+            loadSavedData();
+            updateHeaderDate();
+            initChart();
+            startWaveAnimation();
+            renderUI();
+            
+            // Periodically check date rollover
+            setInterval(checkDateRollover, 60000);
+        });
+
+        function updateHeaderDate() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' };
+            document.getElementById('current-date-str').textContent = now.toLocaleDateString('zh-TW', options);
+        }
+
+        function loadSavedData() {
+            try {
+                const savedGoal = localStorage.getItem('hydro_goal');
+                if (savedGoal) appState.goal = parseInt(savedGoal, 10);
+
+                const savedLogs = localStorage.getItem(`hydro_logs_${getTodayKey()}`);
+                if (savedLogs) appState.todayLogs = JSON.parse(savedLogs);
+
+                const savedHistory = localStorage.getItem('hydro_history');
+                if (savedHistory) appState.history = JSON.parse(savedHistory);
+
+                const savedReminder = localStorage.getItem('hydro_reminder');
+                if (savedReminder) {
+                    const rem = JSON.parse(savedReminder);
+                    appState.reminderActive = rem.active;
+                    appState.reminderInterval = rem.interval;
+                    if (rem.active) setupReminderTimer();
+                }
+            } catch (e) {
+                console.error('Failed to load local storage:', e);
+            }
+        }
+
+        function saveData() {
+            try {
+                const todayKey = getTodayKey();
+                localStorage.setItem('hydro_goal', appState.goal);
+                localStorage.setItem(`hydro_logs_${todayKey}`, JSON.stringify(appState.todayLogs));
+                
+                // Update today's total in history
+                const totalToday = calculateTodayTotal();
+                appState.history[todayKey] = totalToday;
+                localStorage.setItem('hydro_history', JSON.stringify(appState.history));
+
+                localStorage.setItem('hydro_reminder', JSON.stringify({
+                    active: appState.reminderActive,
+                    interval: appState.reminderInterval
+                }));
+            } catch (e) {
+                console.error('Failed to save data:', e);
+            }
+        }
+
+        function calculateTodayTotal() {
+            return appState.todayLogs.reduce((sum, item) => sum + item.amount, 0);
+        }
+
+        // Select beverage type
+        function selectBeverage(type, btnEl) {
+            appState.currentBeverage = type;
+            document.querySelectorAll('.bev-btn').forEach(btn => {
+                btn.classList.remove('bg-nordic-blue', 'text-white', 'border-nordic-blue');
+                btn.classList.add('bg-cream-50', 'text-nordic-dark', 'border-nordic-blue/30');
+            });
+            btnEl.classList.remove('bg-cream-50', 'text-nordic-dark', 'border-nordic-blue/30');
+            btnEl.classList.add('bg-nordic-blue', 'text-white', 'border-nordic-blue');
+        }
+
+        // Add Water Intake Logic
+        function addWater(amount) {
+            if (!amount || amount <= 0) return;
+
+            const now = new Date();
+            const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+            const newEntry = {
+                id: Date.now(),
+                amount: amount,
+                beverage: appState.currentBeverage,
+                typeName: beverageMeta[appState.currentBeverage].name,
+                time: timeStr
+            };
+
+            appState.todayLogs.unshift(newEntry);
+            saveData();
+            renderUI();
+
+            const bevName = beverageMeta[appState.currentBeverage].name;
+            showToast(`已成功記錄 ${amount} ml ${bevName}！`, 'fa-circle-check');
+
+            // Trigger celebration quote if goal reached
+            const todayTotal = calculateTodayTotal();
+            if (todayTotal >= appState.goal && (todayTotal - amount) < appState.goal) {
+                showToast(`🎉 恭喜完成今日飲水目標 ${appState.goal} ml！`, 'fa-trophy');
+            }
+        }
+
+        function addCustomWater() {
+            const input = document.getElementById('custom-water-input');
+            const val = parseInt(input.value, 10);
+            if (isNaN(val) || val <= 0) {
+                showToast('請輸入有效的水量 (ml)', 'fa-triangle-exclamation');
+                return;
+            }
+            addWater(val);
+            input.value = '';
+        }
+
+        function deleteLog(id) {
+            appState.todayLogs = appState.todayLogs.filter(log => log.id !== id);
+            saveData();
+            renderUI();
+            showToast('已刪除該筆記錄', 'fa-trash-can');
+        }
+
+        function confirmResetToday() {
+            if (appState.todayLogs.length === 0) {
+                showToast('今日尚無記錄可清空', 'fa-circle-info');
+                return;
+            }
+            document.getElementById('confirm-modal-title').textContent = '清空今日記錄？';
+            document.getElementById('confirm-modal-msg').textContent = '確定要清除今天的所有飲水項目嗎？這將重設今日的進度。';
+            document.getElementById('confirm-modal-action-btn').onclick = () => {
+                appState.todayLogs = [];
+                saveData();
+                renderUI();
+                closeConfirmModal();
+                showToast('今日飲水記錄已清空', 'fa-arrow-rotate-left');
+            };
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal').classList.add('hidden');
+        }
+
+        // Render UI Elements
+        function renderUI() {
+            const total = calculateTodayTotal();
+            const goal = appState.goal;
+            const percentage = Math.min(Math.round((total / goal) * 100), 100);
+            const remaining = Math.max(goal - total, 0);
+
+            // Text displays
+            document.getElementById('header-goal-display').textContent = goal;
+            document.getElementById('current-intake-amount').textContent = total;
+            document.getElementById('goal-intake-amount').textContent = goal;
+            document.getElementById('intake-percentage-badge').textContent = `${percentage}%`;
+            document.getElementById('remaining-amount').textContent = remaining;
+            document.getElementById('today-count').textContent = appState.todayLogs.length;
+
+            // Quote dynamic updating based on progress
+            const quoteEl = document.getElementById('hydration-status-quote');
+            if (percentage === 0) {
+                quoteEl.textContent = '"A journey of two liters starts with a single sip."';
+            } else if (percentage < 50) {
+                quoteEl.textContent = '"Keep flowing. Every glass nourishes your vitality."';
+            } else if (percentage < 100) {
+                quoteEl.textContent = '"More than halfway there! Feel the hydration wave."';
+            } else {
+                quoteEl.textContent = '"Goal achieved! Body and mind in perfect harmony."';
+            }
+
+            // Streak calculation
+            const streak = calculateStreak();
+            document.getElementById('streak-count').textContent = streak;
+
+            // Render timeline items
+            renderTimelineLogs();
+
+            // Update Weekly Chart
+            updateChartData();
+
+            // Target wave target ratio in animation
+            targetFillLevel = Math.min(total / goal, 1.05);
+        }
+
+        function renderTimelineLogs() {
+            const container = document.getElementById('logs-container');
+            const emptyMsg = document.getElementById('empty-logs-msg');
+
+            if (appState.todayLogs.length === 0) {
+                container.innerHTML = '';
+                emptyMsg.classList.remove('hidden');
+                return;
+            }
+
+            emptyMsg.classList.add('hidden');
+            container.innerHTML = appState.todayLogs.map(log => {
+                const meta = beverageMeta[log.beverage] || beverageMeta.water;
+                return `
+                    <div class="bg-cream-50 border border-nordic-blue/15 rounded-xl p-3 flex justify-between items-center text-xs font-mono hover:border-nordic-blue/40 transition-all">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white" style="background-color: ${meta.color}">
+                                <i class="fa-solid ${meta.icon}"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-nordic-dark text-sm flex items-center gap-1.5">
+                                    <span>${log.amount} ml</span>
+                                    <span class="text-[10px] font-normal px-1.5 py-0.2 rounded bg-nordic-blue/10 text-nordic-dark/70">${meta.name}</span>
+                                </div>
+                                <div class="text-[10px] text-nordic-dark/50">${log.time}</div>
+                            </div>
+                        </div>
+                        <button onclick="deleteLog(${log.id})" class="text-nordic-dark/40 hover:text-red-500 p-1.5 transition-colors" title="刪除此筆記錄">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function calculateStreak() {
+            let streak = 0;
+            const today = new Date();
+            
+            // Check past days
+            for (let i = 0; i < 30; i++) {
+                const d = new Date();
+                d.setDate(today.getDate() - i);
+                const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                
+                const amount = appState.history[key] || 0;
+                if (i === 0) {
+                    // Today: if goal met count it, if not yet met don't break streak from yesterday
+                    if (amount >= appState.goal) streak++;
+                } else {
+                    if (amount >= appState.goal) {
+                        streak++;
+                    } else {
+                        break;
+                    }
+                }
+            }
+            return streak;
+        }
+
+        // Goal Modal
+        function openGoalModal() {
+            document.getElementById('goal-modal-input').value = appState.goal;
+            document.getElementById('goal-modal').classList.remove('hidden');
+        }
+
+        function closeGoalModal() {
+            document.getElementById('goal-modal').classList.add('hidden');
+        }
+
+        function setModalGoalValue(val) {
+            document.getElementById('goal-modal-input').value = val;
+        }
+
+        function saveNewGoal() {
+            const input = document.getElementById('goal-modal-input');
+            const val = parseInt(input.value, 10);
+            if (isNaN(val) || val < 500 || val > 10000) {
+                showToast('請設定 500ml 至 10,000ml 之間的合理目標', 'fa-triangle-exclamation');
+                return;
+            }
+            appState.goal = val;
+            saveData();
+            renderUI();
+            closeGoalModal();
+            showToast(`已更新每日飲水目標為 ${val} ml`, 'fa-circle-check');
+        }
+
+        // Reminder Modal & Timer
+        function toggleReminderModal() {
+            const modal = document.getElementById('reminder-modal');
+            modal.classList.toggle('hidden');
+            document.getElementById('reminder-interval-select').value = appState.reminderInterval;
+        }
+
+        function enableReminder() {
+            const select = document.getElementById('reminder-interval-select');
+            appState.reminderInterval = parseInt(select.value, 10);
+            appState.reminderActive = true;
+            setupReminderTimer();
+            saveData();
+            toggleReminderModal();
+            updateReminderStatusUI();
+            showToast(`飲水提醒已開啟 (每 ${appState.reminderInterval} 分鐘)`, 'fa-bell');
+        }
+
+        function disableReminder() {
+            appState.reminderActive = false;
+            if (appState.reminderTimer) clearInterval(appState.reminderTimer);
+            saveData();
+            toggleReminderModal();
+            updateReminderStatusUI();
+            showToast('飲水提醒已關閉', 'fa-bell-slash');
+        }
+
+        function setupReminderTimer() {
+            if (appState.reminderTimer) clearInterval(appState.reminderTimer);
+            if (!appState.reminderActive) return;
+
+            const intervalMs = appState.reminderInterval * 60 * 1000;
+            appState.reminderTimer = setInterval(() => {
+                showToast('💧 叮咚！該喝一口開水補充水分囉！', 'fa-droplet');
+                playChimeSound();
+            }, intervalMs);
+            updateReminderStatusUI();
+        }
+
+        function updateReminderStatusUI() {
+            const btnText = document.getElementById('reminder-status-text');
+            if (appState.reminderActive) {
+                btnText.textContent = `提醒: ${appState.reminderInterval}m`;
+            } else {
+                btnText.textContent = '提醒: 關閉';
+            }
+        }
+
+        // Gentle Web Audio API Chime sound
+        function playChimeSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3); // A5
+
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start();
+                osc.stop(ctx.currentTime + 0.6);
+            } catch (e) {
+                // Audio context may be restricted by browser autoplay policy
+            }
+        }
+
+        // Chart.js Weekly Visualization
+        let weeklyChart = null;
+
+        function initChart() {
+            const ctx = document.getElementById('weeklyChart').getContext('2d');
+            
+            weeklyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '飲水量 (ml)',
+                        data: [],
+                        backgroundColor: '#466d98',
+                        hoverBackgroundColor: '#274363',
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => ` ${context.raw} ml`
+                            },
+                            backgroundColor: '#274363',
+                            titleFont: { family: 'Plus Jakarta Sans', size: 11 },
+                            bodyFont: { family: 'Plus Jakarta Sans', size: 12, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { family: 'Plus Jakarta Sans', size: 10 },
+                                color: '#202b38'
+                            }
+                        },
+                        y: {
+                            grid: { color: 'rgba(70, 109, 152, 0.1)' },
+                            ticks: {
+                                font: { family: 'Plus Jakarta Sans', size: 10 },
+                                color: '#202b38',
+                                stepSize: 500
+                            },
+                            suggestedMax: appState.goal
+                        }
+                    }
+                }
+            });
+
+            updateChartData();
+        }
+
+        function updateChartData() {
+            if (!weeklyChart) return;
+
+            const labels = [];
+            const data = [];
+            let totalWeek = 0;
+
+            const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
+            const today = new Date();
+
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(today.getDate() - i);
+                const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                
+                const dayLabel = i === 0 ? '今天' : `週${dayNames[d.getDay()]}`;
+                labels.push(dayLabel);
+
+                const amount = appState.history[key] || 0;
+                data.push(amount);
+                totalWeek += amount;
+            }
+
+            weeklyChart.data.labels = labels;
+            weeklyChart.data.datasets[0].data = data;
+            weeklyChart.update();
+
+            const avg = Math.round(totalWeek / 7);
+            document.getElementById('weekly-avg-label').textContent = `7日均值: ${avg} ml`;
+        }
+
+        // Dynamic Wave Canvas Animation Logic
+        let currentFillLevel = 0;
+        let targetFillLevel = 0;
+        let waveAngle = 0;
+
+        function startWaveAnimation() {
+            const canvas = document.getElementById('water-wave-canvas');
+            const ctx = canvas.getContext('2d');
+
+            function resizeCanvas() {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+            }
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Smooth easing towards target fill level
+                currentFillLevel += (targetFillLevel - currentFillLevel) * 0.05;
+
+                const width = canvas.width;
+                const height = canvas.height;
+                const fillHeight = height * Math.min(currentFillLevel, 1);
+                const waveY = height - fillHeight;
+
+                waveAngle += 0.04;
+
+                // Draw Water Layer (Deep Nordic Blue)
+                ctx.fillStyle = '#466d98';
+                ctx.beginPath();
+                ctx.moveTo(0, height);
+
+                for (let x = 0; x <= width; x += 5) {
+                    const y = waveY + Math.sin(waveAngle + x * 0.02) * 6;
+                    ctx.lineTo(x, y);
+                }
+
+                ctx.lineTo(width, height);
+                ctx.closePath();
+                ctx.fill();
+
+                // Draw Wave Highlight Layer (Softer Nordic Light Accent)
+                ctx.fillStyle = 'rgba(202, 216, 230, 0.35)';
+                ctx.beginPath();
+                ctx.moveTo(0, height);
+
+                for (let x = 0; x <= width; x += 5) {
+                    const y = waveY + Math.cos(waveAngle * 0.8 + x * 0.025) * 8;
+                    ctx.lineTo(x, y);
+                }
+
+                ctx.lineTo(width, height);
+                ctx.closePath();
+                ctx.fill();
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+
+        // Toast Helper
+        let toastTimeout;
+        function showToast(message, iconClass = 'fa-circle-check') {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toast-message');
+            const iconEl = document.getElementById('toast-icon');
+
+            msgEl.textContent = message;
+            iconEl.className = `fa-solid ${iconClass} text-nordic-light`;
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function checkDateRollover() {
+            // Checks if date changed while page was kept open
+            const currentStoredKey = localStorage.getItem('hydro_last_active_date');
+            const todayKey = getTodayKey();
+            if (currentStoredKey && currentStoredKey !== todayKey) {
+                localStorage.setItem('hydro_last_active_date', todayKey);
+                appState.todayLogs = [];
+                renderUI();
+                updateHeaderDate();
+                showToast('新的一天開始囉，飲水紀錄已自動重設！', 'fa-sun');
+            } else if (!currentStoredKey) {
+                localStorage.setItem('hydro_last_active_date', todayKey);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台灣環島旅遊大富翁 - Taiwan Travel Monopoly</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Zen Maru Gothic', 'sans-serif'],
+                    },
+                    colors: {
+                        twYellow: '#FFD166',
+                        twGreen: '#06D6A0',
+                        twBlue: '#118AB2',
+                        twRed: '#EF476F',
+                        twDark: '#073B4C',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 50%, #fef3c7 100%);
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        /* Monopoly Grid Styles */
+        .monopoly-board {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            grid-template-rows: repeat(6, minmax(0, 1fr));
+            gap: 4px;
+            aspect-ratio: 1 / 1;
+            width: 100%;
+            max-width: 780px;
+            margin: auto;
+            position: relative;
+            background-color: #073B4C;
+            padding: 8px;
+            border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .board-center {
+            grid-column: 2 / 6;
+            grid-row: 2 / 6;
+            background: radial-gradient(circle at center, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .tile {
+            background-color: #ffffff;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .tile:hover {
+            transform: scale(1.03);
+            z-index: 10;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+        }
+
+        .tile-active {
+            ring: 4px #EF476F;
+            animation: pulse-border 1.5s infinite;
+        }
+
+        @keyframes pulse-border {
+            0%, 100% { box-shadow: 0 0 0 0px rgba(239, 71, 111, 0.7); }
+            50% { box-shadow: 0 0 0 6px rgba(239, 71, 111, 0); }
+        }
+
+        /* Player Pawn Animation */
+        .player-pawn {
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(0 4px 3px rgba(0,0,0,0.3));
+            z-index: 30;
+        }
+
+        /* Enhanced Taiwan Map SVG Styles */
+        .ocean-bg {
+            fill: #e0f2fe;
+            transition: all 0.5s ease;
+        }
+
+        .county-path {
+            stroke: #ffffff;
+            stroke-width: 1.2;
+            stroke-linejoin: round;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        /* Regional Theme Colors for Map */
+        .region-north { fill: #93c5fd; }
+        .region-central { fill: #6ee7b7; }
+        .region-south { fill: #fde047; }
+        .region-east { fill: #c084fc; }
+        .region-island { fill: #fca5a5; }
+
+        .county-path:hover {
+            fill: #06D6A0 !important;
+            filter: drop-shadow(0 0 8px rgba(6, 214, 160, 0.8));
+            transform: translateY(-1px);
+        }
+
+        .county-path.active {
+            fill: #ef476f !important;
+            stroke: #ffffff;
+            stroke-width: 2.2;
+            filter: drop-shadow(0 0 10px rgba(239, 71, 111, 0.8));
+            animation: county-pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes county-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.82; }
+        }
+
+        /* Map Pin Visual Indicators */
+        .map-pin {
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .map-pin:hover {
+            transform: scale(1.3) translateY(-3px);
+            z-index: 25;
+        }
+
+        .map-pin.active-pin {
+            transform: scale(1.4) translateY(-4px);
+            filter: drop-shadow(0 0 8px rgba(239, 71, 111, 0.9));
+        }
+
+        .map-pin-pulse {
+            animation: map-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+
+        @keyframes map-ping {
+            75%, 100% {
+                transform: scale(2.2);
+                opacity: 0;
+            }
+        }
+
+        /* Dynamic Travel Path Line */
+        .travel-line {
+            stroke: #ef476f;
+            stroke-width: 2.5;
+            stroke-dasharray: 6;
+            animation: dash-draw 1s linear infinite;
+        }
+
+        @keyframes dash-draw {
+            to { stroke-dashoffset: -12; }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #118AB2;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="text-twDark flex flex-col min-h-screen">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-sky-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-2 flex flex-wrap justify-between items-center gap-2">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-400 to-sky-500 flex items-center justify-center text-white text-xl shadow-md">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                </div>
+                <div>
+                    <h1 class="font-black text-lg md:text-xl tracking-wide bg-gradient-to-r from-emerald-600 to-sky-600 bg-clip-text text-transparent">
+                        台灣旅遊大富翁
+                    </h1>
+                    <p class="text-xs text-slate-500 font-bold">Taiwan Attraction Monopoly Map</p>
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="flex items-center gap-2 sm:gap-4 bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200 text-xs sm:text-sm">
+                <!-- Travel Fund -->
+                <div class="flex items-center gap-1.5 px-2.5 py-1 bg-white rounded-xl shadow-sm">
+                    <i class="fa-solid fa-sack-dollar text-amber-500 text-base"></i>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-bold leading-tight">旅遊基金</span>
+                        <span id="player-money" class="font-black text-slate-800">$10,000</span>
+                    </div>
+                </div>
+
+                <!-- Stamps Count -->
+                <div class="flex items-center gap-1.5 px-2.5 py-1 bg-white rounded-xl shadow-sm">
+                    <i class="fa-solid fa-stamp text-rose-500 text-base"></i>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-bold leading-tight">紀念章集郵</span>
+                        <span id="player-stamps" class="font-black text-slate-800">0 / 16</span>
+                    </div>
+                </div>
+
+                <!-- Days Left / Turns -->
+                <div class="flex items-center gap-1.5 px-2.5 py-1 bg-white rounded-xl shadow-sm">
+                    <i class="fa-solid fa-calendar-day text-sky-500 text-base"></i>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-bold leading-tight">旅途天數</span>
+                        <span id="game-turn" class="font-black text-slate-800">第 1 天</span>
+                    </div>
+                </div>
+
+                <!-- Mute / Audio Switch -->
+                <button id="btn-audio" onclick="toggleAudio()" class="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-slate-600 hover:text-sky-600 shadow-sm transition">
+                    <i id="audio-icon" class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto p-3 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left Section: Monopoly Board / Taiwan Interactive View (8 cols) -->
+        <section class="lg:col-span-8 flex flex-col gap-4">
+            
+            <!-- Mobile Navigation View Switcher -->
+            <div class="flex lg:hidden bg-white/80 p-1 rounded-2xl border border-slate-200 shadow-sm text-sm font-bold">
+                <button onclick="switchMobileTab('board')" id="tab-btn-board" class="flex-1 py-2 rounded-xl bg-emerald-500 text-white shadow-sm transition">
+                    <i class="fa-solid fa-gamepad mr-1"></i> 環島棋盤
+                </button>
+                <button onclick="switchMobileTab('map')" id="tab-btn-map" class="flex-1 py-2 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-map mr-1"></i> 全台地圖
+                </button>
+                <button onclick="switchMobileTab('passport')" id="tab-btn-passport" class="flex-1 py-2 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-book-bookmark mr-1"></i> 集章集郵冊
+                </button>
+            </div>
+
+            <!-- Monopoly Board Container -->
+            <div id="board-view" class="w-full flex justify-center">
+                <div class="monopoly-board shadow-2xl relative">
+                    
+                    <!-- Board Center Display (Interactive SVG Map & Spot Info) -->
+                    <div class="board-center p-3 flex flex-col justify-between relative bg-gradient-to-b from-sky-100/70 via-white to-amber-50/50">
+                        
+                        <!-- Top Bar inside Center -->
+                        <div class="flex justify-between items-center border-b border-sky-200/80 pb-1.5 z-10">
+                            <div class="flex items-center gap-1.5">
+                                <span id="spot-region-badge" class="px-2 py-0.5 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-800 shadow-sm">
+                                    北部地區
+                                </span>
+                                <span id="spot-county-name" class="font-extrabold text-slate-800 text-xs sm:text-sm">桃園市</span>
+                            </div>
+                            <div class="flex items-center gap-1 text-[10px] sm:text-xs font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded-lg border border-sky-200">
+                                <i class="fa-solid fa-map-marked-alt text-emerald-500"></i>
+                                <span>台灣名勝景點圖</span>
+                            </div>
+                        </div>
+
+                        <div class="relative flex-grow flex items-center justify-center my-0.5 overflow-hidden">
+                            
+                            <!-- Floating Map Controls / Region Legend -->
+                            <div class="absolute top-1 left-1 flex flex-col gap-1 z-10">
+                                <div class="bg-white/90 backdrop-blur-md px-2 py-1 rounded-lg border border-slate-200/80 shadow-sm text-[9px] font-bold flex flex-wrap gap-1 max-w-[130px]">
+                                    <span class="flex items-center gap-0.5 text-blue-700"><i class="fa-solid fa-circle text-[7px] text-blue-400"></i>北部</span>
+                                    <span class="flex items-center gap-0.5 text-emerald-700"><i class="fa-solid fa-circle text-[7px] text-emerald-400"></i>中部</span>
+                                    <span class="flex items-center gap-0.5 text-amber-700"><i class="fa-solid fa-circle text-[7px] text-amber-400"></i>南部</span>
+                                    <span class="flex items-center gap-0.5 text-purple-700"><i class="fa-solid fa-circle text-[7px] text-purple-400"></i>東部</span>
+                                    <span class="flex items-center gap-0.5 text-rose-700"><i class="fa-solid fa-circle text-[7px] text-rose-400"></i>離島</span>
+                                </div>
+                            </div>
+
+                            <!-- Floating Compass Rose Ornament -->
+                            <div class="absolute top-1 right-2 z-10 pointer-events-none opacity-75">
+                                <div class="w-8 h-8 rounded-full border border-sky-300 flex items-center justify-center bg-white/40 backdrop-blur-sm text-[10px] font-black text-sky-700">
+                                    <span>N</span>
+                                </div>
+                            </div>
+
+                            <!-- SVG Map Canvas -->
+                            <svg id="taiwan-svg" viewBox="0 0 400 520" class="h-full max-h-[230px] sm:max-h-[280px] drop-shadow-xl w-full">
+                                <defs>
+                                    <radialGradient id="ocean-grad" cx="50%" cy="50%" r="65%">
+                                        <stop offset="0%" stop-color="#f0f9ff" />
+                                        <stop offset="60%" stop-color="#e0f2fe" />
+                                        <stop offset="100%" stop-color="#bae6fd" />
+                                    </radialGradient>
+                                </defs>
+
+                                <!-- Ocean Water Base -->
+                                <rect width="400" height="520" fill="url(#ocean-grad)" rx="12" class="ocean-bg" />
+
+                                <!-- Ocean Grid Lines -->
+                                <g stroke="#0284c7" stroke-width="0.3" stroke-dasharray="3,3" opacity="0.25">
+                                    <line x1="0" y1="130" x2="400" y2="130" />
+                                    <line x1="0" y1="260" x2="400" y2="260" />
+                                    <line x1="0" y1="390" x2="400" y2="390" />
+                                    <line x1="100" y1="0" x2="100" y2="520" />
+                                    <line x1="200" y1="0" x2="200" y2="520" />
+                                    <line x1="300" y1="0" x2="300" y2="520" />
+                                </g>
+
+                                <!-- Dynamic Flight/Travel Animated Path -->
+                                <path id="travel-path" class="travel-line" d="" fill="none" opacity="0" />
+
+                                <!-- High Precision County Vector Paths -->
+                                <g id="map-paths">
+                                    <path data-county="基隆" class="county-path region-north" d="M 285 38 L 296 35 L 298 42 L 288 47 Z" />
+                                    <path data-county="台北" class="county-path region-north" d="M 252 52 C 260 48, 272 48, 276 56 C 278 65, 265 72, 255 68 C 248 62, 250 54, 252 52 Z" />
+                                    <path data-county="新北" class="county-path region-north" d="M 238 45 C 255 28, 290 30, 310 48 C 318 62, 295 95, 275 92 C 268 85, 278 72, 275 56 C 270 45, 252 45, 245 52 C 235 62, 245 80, 238 88 C 228 82, 225 60, 238 45 Z" />
+                                    <path data-county="桃園" class="county-path region-north" d="M 210 60 C 225 50, 238 52, 238 82 C 230 98, 218 105, 210 92 C 205 80, 208 68, 210 60 Z" />
+                                    <path data-county="新竹" class="county-path region-north" d="M 185 80 C 210 92, 222 100, 212 122 C 198 128, 185 110, 178 95 Z" />
+                                    <path data-county="宜蘭" class="county-path region-north" d="M 275 92 C 298 95, 305 130, 280 152 C 265 145, 260 120, 265 105 Z" />
+                                    <path data-county="苗栗" class="county-path region-central" d="M 172 102 C 190 115, 212 122, 202 148 C 180 152, 168 135, 165 118 Z" />
+                                    <path data-county="台中" class="county-path region-central" d="M 165 142 C 190 148, 235 142, 228 178 C 185 182, 160 170, 152 155 Z" />
+                                    <path data-county="彰化" class="county-path region-central" d="M 138 165 C 158 168, 168 172, 158 202 C 140 205, 130 185, 138 165 Z" />
+                                    <path data-county="南投" class="county-path region-central" d="M 172 178 C 228 172, 238 220, 202 255 C 170 248, 168 210, 172 178 Z" />
+                                    <path data-county="雲林" class="county-path region-central" d="M 122 198 C 155 202, 165 208, 155 235 C 128 238, 118 218, 122 198 Z" />
+                                    <path data-county="嘉義" class="county-path region-south" d="M 120 235 C 160 235, 195 248, 172 282 C 145 285, 115 265, 120 235 Z" />
+                                    <path data-county="台南" class="county-path region-south" d="M 108 275 C 148 280, 162 285, 148 325 C 118 328, 102 305, 108 275 Z" />
+                                    <path data-county="高雄" class="county-path region-south" d="M 125 322 C 162 300, 192 320, 168 392 C 138 388, 120 358, 125 322 Z" />
+                                    <path data-county="屏東" class="county-path region-south" d="M 138 388 C 172 388, 185 435, 165 488 C 145 488, 132 435, 138 388 Z" />
+                                    <path data-county="花蓮" class="county-path region-east" d="M 252 148 C 282 152, 268 268, 222 288 C 218 245, 238 180, 252 148 Z" />
+                                    <path data-county="台東" class="county-path region-east" d="M 218 285 C 262 272, 222 418, 168 428 C 178 375, 202 325, 218 285 Z" />
+                                    <g data-county="澎湖" class="county-path region-island">
+                                        <path d="M 52 225 C 58 220, 68 225, 62 238 C 55 242, 48 232, 52 225 Z" />
+                                        <path d="M 68 212 L 74 210 L 72 218 Z" />
+                                    </g>
+                                    <g data-county="金門" class="county-path region-island">
+                                        <path d="M 32 125 C 42 120, 52 122, 48 132 C 38 135, 28 130, 32 125 Z" />
+                                    </g>
+                                    <g data-county="馬祖" class="county-path region-island">
+                                        <circle cx="45" cy="45" r="4" />
+                                        <circle cx="56" cy="40" r="3" />
+                                    </g>
+                                </g>
+
+                                <!-- Map Pins Container -->
+                                <g id="map-pins"></g>
+
+                                <!-- SVG Interactive Map Tooltip -->
+                                <g id="map-tooltip" opacity="0" pointer-events="none">
+                                    <rect id="tooltip-bg" x="0" y="0" width="110" height="34" rx="8" fill="#073B4C" opacity="0.9" />
+                                    <text id="tooltip-title" x="10" y="15" fill="#ffffff" font-size="10" font-weight="bold">台北市</text>
+                                    <text id="tooltip-sub" x="10" y="27" fill="#06D6A0" font-size="8">台北101觀景台</text>
+                                </g>
+                            </svg>
+
+                            <!-- Mini Spot Card Overlay inside Map -->
+                            <div id="map-card-overlay" class="absolute bottom-1 left-1 right-1 bg-white/95 backdrop-blur-md border border-sky-100 p-2 rounded-xl shadow-lg transition-all z-20">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2.5 overflow-hidden">
+                                        <!-- Real Spot Photo Thumbnail with icon badge -->
+                                        <div class="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 shadow-sm border border-slate-100 flex items-center justify-center bg-slate-100">
+                                            <img id="spot-overlay-img" src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=200&auto=format&fit=crop" alt="景點照片" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/200x200/0284c7/ffffff?text=Taiwan';" />
+                                            <div class="absolute inset-0 bg-black/10"></div>
+                                            <div class="absolute bottom-0.5 right-0.5 w-4 h-4 bg-white/90 rounded-full flex items-center justify-center text-[9px] shadow">
+                                                <i id="spot-icon" class="fa-solid fa-plane-departure text-sky-600"></i>
+                                            </div>
+                                        </div>
+                                        <div class="truncate">
+                                            <h3 id="spot-name" class="font-black text-slate-800 text-xs sm:text-sm truncate">桃園國際機場</h3>
+                                            <p id="spot-desc" class="text-[10px] text-slate-500 truncate">環島之旅起點！每次經過可獲得台灣旅遊補助 $2,000。</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="openSpotModal()" class="px-2.5 py-1.5 bg-sky-500 hover:bg-sky-600 text-white text-[11px] font-bold rounded-lg transition shadow-sm flex items-center gap-1 shrink-0 ml-1">
+                                        <span>詳情</span>
+                                        <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Player Pawn Location Bar -->
+                        <div class="flex justify-between items-center text-[10px] sm:text-xs font-bold text-slate-600 bg-white/80 backdrop-blur p-1.5 rounded-xl border border-slate-200/80 z-10">
+                            <span id="current-location-text" class="truncate max-w-[200px]">目前位置：桃園國際機場</span>
+                            <span id="spot-stamp-status" class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0">
+                                <i class="fa-regular fa-circle-check"></i> 未解鎖集章
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="passport-view" class="hidden bg-white p-5 rounded-2xl border border-slate-200 shadow-lg">
+                <div class="flex justify-between items-center mb-4 pb-2 border-b">
+                    <div>
+                        <h2 class="font-extrabold text-lg text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-book-bookmark text-rose-500"></i>
+                            台灣環島紀念章護照
+                        </h2>
+                        <p class="text-xs text-slate-500">走遍全台各大景點，蒐集專屬文創紀念章！</p>
+                    </div>
+                    <span id="passport-progress" class="bg-rose-50 text-rose-600 font-black text-xs px-3 py-1.5 rounded-full border border-rose-200">
+                        進度：0%
+                    </span>
+                </div>
+                <!-- Stamps Grid -->
+                <div id="stamps-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-h-[420px] overflow-y-auto p-1">
+                    <!-- Dynamic Stamp Cards generated by JS -->
+                </div>
+            </div>
+
+        </section>
+
+        <section class="lg:col-span-4 flex flex-col gap-4">
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xl flex flex-col items-center justify-between gap-4 relative overflow-hidden">
+                <div class="absolute -right-8 -top-8 w-24 h-24 bg-amber-100 rounded-full blur-xl opacity-60"></div>
+                <div class="absolute -left-8 -bottom-8 w-24 h-24 bg-sky-100 rounded-full blur-xl opacity-60"></div>
+
+                <div class="w-full flex justify-between items-center z-10">
+                    <span class="text-xs font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                        <i class="fa-solid fa-compass text-sky-500"></i> 行程控制台
+                    </span>
+                    <span id="dice-result-badge" class="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+                        準備出發！
+                    </span>
+                </div>
+
+                <!-- Dice Container -->
+                <div class="my-2 relative flex items-center justify-center">
+                    <div id="dice-container" class="w-20 h-20 bg-gradient-to-tr from-amber-400 to-amber-300 rounded-2xl shadow-lg border-2 border-white flex items-center justify-center text-white text-4xl font-black transition-transform duration-300 cursor-pointer hover:scale-105 active:scale-95" onclick="rollDice()">
+                        <i id="dice-icon" class="fa-solid fa-dice-one"></i>
+                    </div>
+                </div>
+
+                <!-- Dice Roll Button -->
+                <button id="btn-roll" onclick="rollDice()" class="w-full py-3.5 px-6 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-base rounded-xl shadow-lg shadow-emerald-500/30 transition transform active:scale-95 flex items-center justify-center gap-2 z-10">
+                    <i class="fa-solid fa-dice text-xl"></i>
+                    <span>擲骰子出發 (Roll)</span>
+                </button>
+
+                <!-- Spot Action Buttons -->
+                <div class="w-full grid grid-cols-2 gap-2 z-10">
+                    <button id="btn-checkin" onclick="checkInSpot()" class="py-2.5 px-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold text-xs shadow transition flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-stamp"></i>
+                        <span>景點打卡 ($500)</span>
+                    </button>
+                    <button id="btn-souvenir" onclick="buySouvenir()" class="py-2.5 px-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow transition flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-gift"></i>
+                        <span>買伴手禮 ($800)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Game Log Console -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-md flex-grow flex flex-col min-h-[260px]">
+                <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                    <h3 class="font-extrabold text-xs text-slate-600 flex items-center gap-1.5 uppercase tracking-wider">
+                        <i class="fa-solid fa-list-check text-emerald-500"></i>
+                        旅程動態日誌
+                    </h3>
+                    <button onclick="clearLog()" class="text-[10px] text-slate-400 hover:text-slate-600 font-bold">
+                        清除
+                    </button>
+                </div>
+                <div id="game-log" class="flex-grow overflow-y-auto space-y-2 pr-1 text-xs max-h-[220px]">
+                    <div class="p-2 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 rounded-r-lg">
+                        <span class="font-bold">歡迎來到台灣！</span> 獲得初始旅遊基金 $10,000。請擲骰子開啟環島之旅！
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mode Switchers (Desktop) -->
+            <div class="hidden lg:flex bg-white p-3 rounded-2xl border border-slate-200 shadow-sm justify-around">
+                <button onclick="switchMobileTab('board')" class="px-3 py-2 text-xs font-bold text-emerald-600 hover:bg-emerald-50 rounded-xl transition flex items-center gap-1">
+                    <i class="fa-solid fa-gamepad"></i> 棋盤模式
+                </button>
+                <button onclick="switchMobileTab('passport')" class="px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition flex items-center gap-1">
+                    <i class="fa-solid fa-book-bookmark"></i> 集章冊
+                </button>
+                <button onclick="resetGameModal()" class="px-3 py-2 text-xs font-bold text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition flex items-center gap-1">
+                    <i class="fa-solid fa-rotate-right"></i> 重新開始
+                </button>
+            </div>
+
+        </section>
+
+    </main>
+
+    <div id="spot-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative transform transition-all scale-95 opacity-0" id="spot-modal-content">
+            <button onclick="closeSpotModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 font-bold transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-3">
+                <div id="modal-spot-icon-bg" class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl shadow-inner shrink-0">
+                    <i id="modal-spot-icon" class="fa-solid fa-location-dot"></i>
+                </div>
+                <div>
+                    <span id="modal-spot-county" class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+                        台北市
+                    </span>
+                    <h2 id="modal-spot-title" class="text-xl font-black text-slate-800">台北101觀景台</h2>
+                </div>
+            </div>
+
+            <!-- Spot Real Photo Banner -->
+            <div class="relative w-full h-44 rounded-2xl overflow-hidden mb-4 shadow-md bg-slate-900 border border-slate-100">
+                <img id="modal-spot-img" src="https://images.unsplash.com/photo-1508248467071-046d62800c12?w=800&auto=format&fit=crop" alt="景點真實照片" class="w-full h-full object-cover transition-opacity duration-300" onerror="this.onerror=null; this.src='https://placehold.co/600x400/0284c7/ffffff?text=Taiwan+Travel';" />
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/20 to-transparent"></div>
+                <div class="absolute bottom-3 left-3 right-3 text-white z-10 flex justify-between items-end">
+                    <p id="modal-spot-tagline" class="font-black text-sm sm:text-base drop-shadow-md pr-2">「站在雲端，俯瞰台灣之美」</p>
+                    <span id="modal-spot-ticket" class="text-[11px] bg-white/20 backdrop-blur-md border border-white/30 px-2.5 py-1 rounded-full font-bold shrink-0">
+                        打卡花費: $500
+                    </span>
+                </div>
+            </div>
+
+            <!-- Spot Information -->
+            <div class="space-y-3 text-xs text-slate-600 mb-6">
+                <div>
+                    <h4 class="font-bold text-slate-800 mb-1 flex items-center gap-1">
+                        <i class="fa-solid fa-circle-info text-sky-500"></i> 景點介紹
+                    </h4>
+                    <p id="modal-spot-desc">台北101是世界知名高樓地標，擁有全台最快高速電梯與89樓室內觀景台。</p>
+                </div>
+                <div class="p-3 bg-amber-50 rounded-xl border border-amber-100">
+                    <h4 class="font-bold text-amber-800 mb-1 flex items-center gap-1">
+                        <i class="fa-solid fa-lightbulb text-amber-500"></i> 旅遊冷知識 / 伴手禮
+                    </h4>
+                    <p id="modal-spot-fact" class="text-amber-900">87至92樓掛置有重達660公噸的風阻尼球，用於抵禦強風與地震！</p>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button id="modal-btn-checkin" onclick="checkInSpot(); closeSpotModal();" class="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-stamp"></i> 打卡集章 ($500)
+                </button>
+                <button onclick="closeSpotModal()" class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-extrabold text-xs rounded-xl transition">
+                    關閉
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="event-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center transform transition-all">
+            <div id="event-icon-box" class="w-16 h-16 rounded-full bg-amber-100 text-amber-500 flex items-center justify-center text-3xl mx-auto mb-3 shadow-inner">
+                <i class="fa-solid fa-clover"></i>
+            </div>
+            <h3 id="event-title" class="text-lg font-black text-slate-800 mb-1">寶島命運與機會卡</h3>
+            <p id="event-desc" class="text-xs text-slate-600 mb-5 leading-relaxed">你在夜市享用美味小吃，幸運獲得美食抵用券！旅遊基金 +$1,000</p>
+            <button onclick="closeEventModal()" class="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow-md transition">
+                太棒了！繼續旅程
+            </button>
+        </div>
+    </div>
+
+    <footer class="bg-white/60 border-t border-slate-200 py-3 text-center text-xs text-slate-500 font-bold mt-auto">
+        台灣旅遊大富翁 Map Web App &copy; 2026 - 踏青探索台灣名勝景點
+    </footer>
+
+    <script>
+        // Global Game State
+        let gameState = {
+            money: 10000,
+            position: 0,
+            turn: 1,
+            stamps: new Set(),
+            souvenirs: new Set(),
+            isRolling: false,
+            audioMuted: false
+        };
+
+        // 20 Monopoly Board Tiles
+        const BOARD_TILES = [
+            { id: 0, name: '桃園國際機場', county: '桃園', region: '北部地區', type: 'start', icon: 'fa-plane-departure', price: 0, desc: '環島之旅起點！每次經過可獲得台灣旅遊補助 $2,000。', fact: '桃園機場是台灣最大也是最繁忙的國際機場。', color: 'bg-sky-600', img: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&auto=format&fit=crop' },
+            { id: 1, name: '台北101觀景台', county: '台北', region: '北部地區', type: 'spot', icon: 'fa-building-user', price: 600, desc: '台灣代表性高樓地標，俯瞰台北無敵夜景。', fact: '設有重達660公噸的巨大風阻尼球抵禦颱風與地震！', color: 'bg-sky-500', img: 'https://images.unsplash.com/photo-1508248467071-046d62800c12?w=800&auto=format&fit=crop' },
+            { id: 2, name: '九份老街', county: '新北', region: '北部地區', type: 'spot', icon: 'fa-house-chimney-window', price: 500, desc: '山城燈火與懷舊石階，享用芋圓與草仔粿。', fact: '曾被稱為黃金之都，展現濃厚懷舊淘金風情。', color: 'bg-sky-500', img: 'https://images.unsplash.com/photo-1571474004502-c1def214ac6d?w=800&auto=format&fit=crop' },
+            { id: 3, name: '礁溪溫泉公園', county: '宜蘭', region: '北部地區', type: 'spot', icon: 'fa-hot-tub-person', price: 500, desc: '平地碳酸氫鈉泉，天然泡腳放鬆身心。', fact: '宜蘭溫泉泉質無色無味，有美容湯之稱。', color: 'bg-sky-500', img: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&auto=format&fit=crop' },
+            { id: 4, name: '寶島命運卡', county: '全台', region: '特別事件', type: 'chance', icon: 'fa-clover', price: 0, desc: '抽取幸運事件，獲得額外獎金或遇到小驚喜！', fact: '台灣處處有溫情，出外旅遊好運連連。', color: 'bg-rose-500', img: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800&auto=format&fit=crop' },
+            { id: 5, name: '太魯閣國家公園', county: '花蓮', region: '東部地區', type: 'spot', icon: 'fa-mountain-sun', price: 700, desc: '雄偉大理岩峽谷，感受大自然的鬼斧神工。', fact: '九曲洞與燕子口是太魯閣著名的峽谷奇景。', color: 'bg-purple-500', img: 'https://images.unsplash.com/photo-1541093730653-299a1db7d7ed?w=800&auto=format&fit=crop' },
+            { id: 6, name: '三仙台風景區', county: '台東', region: '東部地區', type: 'spot', icon: 'fa-bridge', price: 600, desc: '八拱波浪跨海大橋，迎接台灣第一道曙光。', fact: '傳說八仙中的三位曾在此登島而得名。', color: 'bg-purple-500', img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop' },
+            { id: 7, name: '墾丁國家公園', county: '屏東', region: '南部地區', type: 'spot', icon: 'fa-umbrella-beach', price: 700, desc: '碧海藍天與鵝鑾鼻燈塔，充滿熱帶陽光風情。', fact: '台灣第一座成立的國家公園，擁有豐富珊瑚礁生態。', color: 'bg-amber-500', img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop' },
+            { id: 8, name: '高雄駁二特區', county: '高雄', region: '南部地區', type: 'spot', icon: 'fa-palette', price: 600, desc: '港區舊倉庫改建之前衛藝術文創基地。', fact: '園區擺放許多代表高雄工業風的大公仔與大型裝置藝術。', color: 'bg-amber-500', img: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800&auto=format&fit=crop' },
+            { id: 9, name: '台南安平古堡', county: '台南', region: '南部地區', type: 'spot', icon: 'fa-chess-rook', price: 500, desc: '台灣最早的城堡，品嚐安平蝦捲與豆花。', fact: '建於1624年，最初名為熱蘭遮城，是荷治時期要塞。', color: 'bg-amber-500', img: 'https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?w=800&auto=format&fit=crop' },
+            { id: 10, name: '阿里山森林遊樂區', county: '嘉義', region: '南部地區', type: 'spot', icon: 'fa-tree', price: 700, desc: '搭乘小火車觀看日出、雲海、晚霞與巨木群。', fact: '阿里山林業鐵路是世界著名的登山高山鐵路之一。', color: 'bg-amber-500', img: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&auto=format&fit=crop' },
+            { id: 11, name: '台灣美食夜市', county: '全台', region: '特別事件', type: 'chance', icon: 'fa-utensils', price: 0, desc: '享用鹽酥雞、珍奶與蚵仔煎！美食補給站。', fact: '台灣夜市文化名揚海外，是必造訪的美食天堂。', color: 'bg-rose-500', img: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop' },
+            { id: 12, name: '日月潭國家風景區', county: '南投', region: '中部地區', type: 'spot', icon: 'fa-water', price: 700, desc: '騎乘全球最美自行車道，欣賞湖光山色。', fact: '因湖形北半部形如日輪，南半部狀如月鉤而得名。', color: 'bg-emerald-500', img: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop' },
+            { id: 13, name: '高美濕地', county: '台中', region: '中部地區', type: 'spot', icon: 'fa-wind', price: 600, desc: '漫步木棧道欣賞巨大風車與絕美夕陽倒影。', fact: '擁有豐富的雲林莞草與彈塗魚、招潮蟹生態。', color: 'bg-emerald-500', img: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&auto=format&fit=crop' },
+            { id: 14, name: '勝興車站', county: '苗栗', region: '中部地區', type: 'spot', icon: 'fa-train-subway', price: 500, desc: '舊山線鐵道勝興車站，體驗舊山線鐵道自行車。', fact: '曾是台灣西部縱貫鐵路海拔最高（402.326公尺）的車站。', color: 'bg-emerald-500', img: 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=800&auto=format&fit=crop' },
+            { id: 15, name: '台灣高鐵特快車', county: '全台', region: '特別交通', type: 'hsr', icon: 'fa-train-tram', price: 0, desc: '搭乘高鐵極速移動，隨機前進 2 ~ 4 格！', fact: '貫穿台灣南北的一小時半生活圈重要交通樞紐。', color: 'bg-indigo-600', img: 'https://images.unsplash.com/photo-1532105956626-9569c03602f6?w=800&auto=format&fit=crop' },
+            { id: 16, name: '澎湖跨海大橋', county: '澎湖', region: '離島地區', type: 'spot', icon: 'fa-water-ladder', price: 600, desc: '漫遊雙心石滬與拱門大橋，享用仙人掌冰。', fact: '澎湖跨海大橋連結白沙與西嶼，曾是東亞第一座深海大橋。', color: 'bg-rose-400', img: 'https://images.unsplash.com/photo-1509233725247-49e657c54213?w=800&auto=format&fit=crop' },
+            { id: 17, name: '金門翟山坑道', county: '金門', region: '離島地區', type: 'spot', icon: 'fa-dungeon', price: 600, desc: '壯麗的水道戰備坑道，品嚐金門高粱與貢糖。', fact: '花崗岩挖鑿之水陸坑道，音響效果極佳每年舉行音樂會。', color: 'bg-rose-400', img: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&auto=format&fit=crop' },
+            { id: 18, name: '馬祖藍眼淚', county: '馬祖', region: '離島地區', type: 'spot', icon: 'fa-wand-magic-sparkles', price: 600, desc: '夜晚海岸夢幻發光夜光藻，世界級奇景。', fact: '被CNN列為世界15大自然奇景之一！', color: 'bg-rose-400', img: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=800&auto=format&fit=crop' },
+            { id: 19, name: '幸運大輪盤', county: '全台', region: '特別事件', type: 'chance', icon: 'fa-gift', price: 0, desc: '幸運旅遊金加碼！獲得交通補助獎金。', fact: '祝福您的寶島環島旅程一路順風、平安喜樂！', color: 'bg-rose-500', img: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800&auto=format&fit=crop' }
+        ];
+
+        class SoundSynth {
+            constructor() {
+                this.ctx = null;
+            }
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+            playTone(freq, type, duration, gainVal = 0.1) {
+                if (gameState.audioMuted) return;
+                try {
+                    this.init();
+                    if (this.ctx.state === 'suspended') {
+                        this.ctx.resume();
+                    }
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e) {}
+            }
+            playStepSound() {
+                this.playTone(350 + Math.random() * 100, 'sine', 0.1, 0.08);
+            }
+            playDiceSound() {
+                this.playTone(600, 'triangle', 0.08, 0.1);
+            }
+            playWinSound() {
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                    setTimeout(() => this.playTone(freq, 'triangle', 0.3, 0.15), idx * 100);
+                });
+            }
+            playEventSound() {
+                this.playTone(440, 'sine', 0.15, 0.1);
+                setTimeout(() => this.playTone(880, 'sine', 0.25, 0.12), 150);
+            }
+        }
+        const audio = new SoundSynth();
+
+        function toggleAudio() {
+            gameState.audioMuted = !gameState.audioMuted;
+            const icon = document.getElementById('audio-icon');
+            if (gameState.audioMuted) {
+                icon.className = 'fa-solid fa-volume-xmark text-rose-500';
+            } else {
+                icon.className = 'fa-solid fa-volume-high text-emerald-600';
+                audio.playTone(440, 'sine', 0.1);
+            }
+        }
+
+        function rollDice() {
+            if (gameState.isRolling) return;
+            gameState.isRolling = true;
+            document.getElementById('btn-roll').disabled = true;
+
+            const diceContainer = document.getElementById('dice-container');
+            const diceIcon = document.getElementById('dice-icon');
+            const resultBadge = document.getElementById('dice-result-badge');
+
+            const diceIcons = [
+                'fa-dice-one', 'fa-dice-two', 'fa-dice-three',
+                'fa-dice-four', 'fa-dice-five', 'fa-dice-six'
+            ];
+
+            let count = 0;
+            const rollInterval = setInterval(() => {
+                const tempRoll = Math.floor(Math.random() * 6) + 1;
+                diceIcon.className = `fa-solid ${diceIcons[tempRoll - 1]}`;
+                diceContainer.style.transform = `rotate(${Math.random() * 360}deg) scale(1.1)`;
+                audio.playDiceSound();
+                count++;
+
+                if (count > 10) {
+                    clearInterval(rollInterval);
+                    const finalRoll = Math.floor(Math.random() * 6) + 1;
+                    diceIcon.className = `fa-solid ${diceIcons[finalRoll - 1]}`;
+                    diceContainer.style.transform = `rotate(0deg) scale(1)`;
+
+                    resultBadge.innerText = `🎲 擲出了 ${finalRoll} 點！`;
+                    addLog(`🎲 擲出 <b>${finalRoll}</b> 點！向前邁進...`, 'indigo');
+
+                    movePlayerSteps(finalRoll);
+                }
+            }, 80);
+        }
+
+        function handleTileLanding(position) {
+            const tile = BOARD_TILES[position];
+            highlightCountyOnMap(tile.county);
+            updateMapOverlayCard(tile);
+
+            if (tile.type === 'spot') {
+                if (!gameState.stamps.has(tile.id)) {
+                    addLog(`📍 抵達 <b>${tile.name}</b> (${tile.county})！可花費 $${tile.price} 打卡集章。`, 'sky');
+                } else {
+                    addLog(`📍 再次來到 <b>${tile.name}</b>，重溫美好風景！`, 'sky');
+                }
+            } else if (tile.type === 'chance') {
+                triggerChanceEvent(tile);
+            } else if (tile.type === 'hsr') {
+                audio.playWinSound();
+                const bonusSteps = Math.floor(Math.random() * 3) + 2;
+                addLog(`🚄 乘坐台灣高鐵特快車！直達下個目的地，額外前進 <b>${bonusSteps}</b> 格！`, 'indigo');
+                setTimeout(() => {
+                    movePlayerSteps(bonusSteps);
+                }, 800);
+            }
+        }
+
+        function triggerChanceEvent(tile) {
+            audio.playEventSound();
+            const events = [
+                { title: '美食抵用券', desc: '在台灣夜市享用小吃，幸運抽中地方推廣抵用券！獲得補助 $1,500。', amount: 1500 },
+                { title: '悠遊卡滿額贈', desc: '搭乘大眾運輸累積點數，兌換旅遊津貼 $1,000！', amount: 1000 },
+                { title: '特產伴手禮折價', desc: '購買伴手禮獲得在地老店優惠，旅遊基金 +$800。', amount: 800 },
+                { title: '計程車資補貼', desc: '獲得地方觀光局計程車補貼 $1,200！', amount: 1200 }
+            ];
+
+            const ev = events[Math.floor(Math.random() * events.length)];
+            gameState.money += ev.amount;
+            updateUI();
+
+            document.getElementById('event-title').innerText = `✨ ${ev.title}`;
+            document.getElementById('event-desc').innerText = ev.desc;
+            document.getElementById('event-modal').classList.remove('hidden');
+
+            addLog(`🎁 觸發特別事件【${ev.title}】：獲得 $${ev.amount}！`, 'amber');
+        }
+
+        function closeEventModal() {
+            document.getElementById('event-modal').classList.add('hidden');
+        }
+
+        function checkInSpot() {
+            const currentTile = BOARD_TILES[gameState.position];
+            if (currentTile.type !== 'spot') return;
+
+            if (gameState.stamps.has(currentTile.id)) {
+                addLog(`ℹ️ 您已經在 <b>${currentTile.name}</b> 完成打卡了！`, 'slate');
+                return;
+            }
+
+            if (gameState.money < currentTile.price) {
+                addLog(`⚠️ 旅遊基金不足！無法完成打卡。`, 'rose');
+                return;
+            }
+
+            gameState.money -= currentTile.price;
+            gameState.stamps.add(currentTile.id);
+
+            const badge = document.getElementById(`tile-stamp-badge-${currentTile.id}`);
+            if (badge) {
+                badge.innerText = '已集章';
+                badge.className = 'text-[9px] font-black text-rose-600 bg-rose-50 px-1 rounded';
+            }
+
+            audio.playWinSound();
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+            }
+
+            addLog(`🎉 成功打卡 <b>${currentTile.name}</b>！解鎖紀念章 (-$${currentTile.price})`, 'emerald');
+            updateUI();
+            renderPassportStamps();
+            updateMapOverlayCard(currentTile);
+
+            const totalSpots = BOARD_TILES.filter(t => t.type === 'spot').length;
+            if (gameState.stamps.size === totalSpots) {
+                setTimeout(() => {
+                    if (typeof confetti === 'function') {
+                        confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
+                    }
+                    addLog(`🏆 恭喜！您已搜集完全台 16 個景點紀念章，成就台灣環島大滿貫！`, 'amber');
+                }, 500);
+            }
+        }
+
+        function buySouvenir() {
+            const currentTile = BOARD_TILES[gameState.position];
+            if (currentTile.type !== 'spot') return;
+
+            const souvenirCost = 800;
+            if (gameState.money < souvenirCost) {
+                addLog(`⚠️ 旅遊基金不足以購買伴手禮 ($800)！`, 'rose');
+                return;
+            }
+
+            gameState.money -= souvenirCost;
+            gameState.souvenirs.add(currentTile.name);
+            audio.playWinSound();
+
+            addLog(`🎁 購買了 <b>${currentTile.name}</b> 名產伴手禮 (-$800)！`, 'amber');
+            updateUI();
+        }
+
+        // SVG Map Coordinates for Pin Rendering
+        const COUNTY_MAP_POS = {
+            '桃園': { x: 220, y: 72 },
+            '台北': { x: 262, y: 58 },
+            '新北': { x: 285, y: 68 },
+            '宜蘭': { x: 282, y: 118 },
+            '花蓮': { x: 252, y: 200 },
+            '台東': { x: 212, y: 340 },
+            '屏東': { x: 155, y: 435 },
+            '高雄': { x: 142, y: 350 },
+            '台南': { x: 125, y: 298 },
+            '嘉義': { x: 142, y: 255 },
+            '南投': { x: 192, y: 215 },
+            '台中': { x: 182, y: 162 },
+            '苗栗': { x: 182, y: 128 },
+            '澎湖': { x: 58, y: 232 },
+            '全台': { x: 200, y: 260 }
+        };
+
+        window.onload = function() {
+            renderMonopolyBoard();
+            renderPassportStamps();
+            renderMapPins();
+            updateUI();
+            highlightCountyOnMap(BOARD_TILES[0].county);
+            
+            document.querySelectorAll('.county-path').forEach(path => {
+                path.addEventListener('click', (e) => {
+                    const countyName = e.currentTarget.getAttribute('data-county');
+                    showCountyInfoFromMap(countyName);
+                });
+
+                path.addEventListener('mousemove', (e) => {
+                    const countyName = e.currentTarget.getAttribute('data-county');
+                    showMapTooltip(e, countyName);
+                });
+
+                path.addEventListener('mouseleave', () => {
+                    hideMapTooltip();
+                });
+            });
+        };
+
+        function renderMapPins() {
+            const pinsGroup = document.getElementById('map-pins');
+            if (!pinsGroup) return;
+            pinsGroup.innerHTML = '';
+
+            BOARD_TILES.forEach((tile, index) => {
+                const pos = COUNTY_MAP_POS[tile.county] || { x: 200, y: 260 };
+                
+                const pinG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                pinG.setAttribute("id", `map-pin-${index}`);
+                pinG.setAttribute("class", "map-pin");
+                pinG.setAttribute("transform", `translate(${pos.x}, ${pos.y})`);
+                pinG.onclick = (e) => {
+                    e.stopPropagation();
+                    onTileClick(index);
+                };
+
+                const pulseCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                pulseCircle.setAttribute("r", "8");
+                pulseCircle.setAttribute("fill", tile.price > 0 ? "#06D6A0" : "#EF476F");
+                pulseCircle.setAttribute("opacity", "0.4");
+                pulseCircle.setAttribute("class", "map-pin-pulse");
+
+                const baseCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                baseCircle.setAttribute("r", "5");
+                baseCircle.setAttribute("fill", "#ffffff");
+                baseCircle.setAttribute("stroke", "#073B4C");
+                baseCircle.setAttribute("stroke-width", "1.5");
+
+                const innerCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                innerCircle.setAttribute("r", "3");
+                innerCircle.setAttribute("fill", tile.price > 0 ? "#118AB2" : "#EF476F");
+
+                pinG.appendChild(pulseCircle);
+                pinG.appendChild(baseCircle);
+                pinG.appendChild(innerCircle);
+
+                pinsGroup.appendChild(pinG);
+            });
+        }
+
+        function showMapTooltip(e, countyName) {
+            const tooltip = document.getElementById('map-tooltip');
+            const title = document.getElementById('tooltip-title');
+            const sub = document.getElementById('tooltip-sub');
+            if (!tooltip || !title || !sub) return;
+            
+            const tile = BOARD_TILES.find(t => t.county === countyName) || { name: '寶島旅遊勝地' };
+            
+            title.textContent = countyName + (countyName.length === 2 ? '縣/市' : '');
+            sub.textContent = tile.name;
+
+            const svg = document.getElementById('taiwan-svg');
+            if (!svg) return;
+            const pt = svg.createSVGPoint();
+            pt.x = e.clientX;
+            pt.y = e.clientY;
+            const svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
+
+            tooltip.setAttribute('transform', `translate(${Math.min(280, svgP.x + 10)}, ${Math.max(10, svgP.y - 40)})`);
+            tooltip.setAttribute('opacity', '1');
+        }
+
+        function hideMapTooltip() {
+            const tooltip = document.getElementById('map-tooltip');
+            if (tooltip) tooltip.setAttribute('opacity', '0');
+        }
+
+        function drawTravelPath(fromTileIdx, toTileIdx) {
+            const fromPos = COUNTY_MAP_POS[BOARD_TILES[fromTileIdx].county] || { x: 200, y: 260 };
+            const toPos = COUNTY_MAP_POS[BOARD_TILES[toTileIdx].county] || { x: 200, y: 260 };
+
+            const travelPath = document.getElementById('travel-path');
+            if (!travelPath) return;
+
+            const midX = (fromPos.x + toPos.x) / 2 - 20;
+            const midY = (fromPos.y + toPos.y) / 2 - 20;
+
+            const d = `M ${fromPos.x} ${fromPos.y} Q ${midX} ${midY} ${toPos.x} ${toPos.y}`;
+            travelPath.setAttribute('d', d);
+            travelPath.setAttribute('opacity', '1');
+
+            setTimeout(() => {
+                travelPath.setAttribute('opacity', '0');
+            }, 1800);
+        }
+
+        function renderMonopolyBoard() {
+            const board = document.querySelector('.monopoly-board');
+            if (!board) return;
+            
+            const gridPositions = [
+                { r: 1, c: 1 }, { r: 1, c: 2 }, { r: 1, c: 3 }, { r: 1, c: 4 }, { r: 1, c: 5 }, { r: 1, c: 6 },
+                { r: 2, c: 6 }, { r: 3, c: 6 }, { r: 4, c: 6 }, { r: 5, c: 6 },
+                { r: 6, c: 6 }, { r: 6, c: 5 }, { r: 6, c: 4 }, { r: 6, c: 3 }, { r: 6, c: 2 }, { r: 6, c: 1 },
+                { r: 5, c: 1 }, { r: 4, c: 1 }, { r: 3, c: 1 }, { r: 2, c: 1 }
+            ];
+
+            BOARD_TILES.forEach((tile, index) => {
+                const pos = gridPositions[index];
+                const tileEl = document.createElement('div');
+                tileEl.id = `tile-${index}`;
+                tileEl.className = `tile ${index === 0 ? 'tile-active' : ''}`;
+                tileEl.style.gridRow = pos.r;
+                tileEl.style.gridColumn = pos.c;
+                tileEl.onclick = () => onTileClick(index);
+
+                tileEl.innerHTML = `
+                    <div class="w-full text-center py-0.5 rounded ${tile.color} text-white font-extrabold text-[9px] truncate">
+                        ${tile.county}
+                    </div>
+                    <div class="my-auto flex flex-col items-center justify-center">
+                        <i class="fa-solid ${tile.icon} text-slate-700 text-sm md:text-base"></i>
+                        <span class="font-extrabold text-[10px] md:text-xs text-slate-800 leading-tight mt-0.5 text-center line-clamp-1">${tile.name}</span>
+                    </div>
+                    <div id="tile-stamp-badge-${index}" class="text-[9px] font-bold ${tile.price > 0 ? 'text-slate-500' : 'text-emerald-600'}">
+                        ${tile.price > 0 ? '$' + tile.price : '特殊'}
+                    </div>
+                `;
+
+                board.appendChild(tileEl);
+            });
+
+            const pawn = document.createElement('div');
+            pawn.id = 'player-pawn';
+            pawn.className = 'player-pawn absolute w-7 h-7 md:w-9 md:h-9 bg-rose-500 rounded-full border-2 border-white shadow-xl flex items-center justify-center text-white text-xs md:text-sm font-black pointer-events-none';
+            pawn.innerHTML = '<i class="fa-solid fa-person-walking-luggage"></i>';
+            board.appendChild(pawn);
+
+            updatePawnPosition(0, false);
+        }
+
+        function updatePawnPosition(tileIndex, animate = true) {
+            const tile = document.getElementById(`tile-${tileIndex}`);
+            const pawn = document.getElementById('player-pawn');
+            const board = document.querySelector('.monopoly-board');
+            if (!tile || !pawn || !board) return;
+
+            const tileRect = tile.getBoundingClientRect();
+            const boardRect = board.getBoundingClientRect();
+
+            const top = tileRect.top - boardRect.top + (tileRect.height / 2) - (pawn.offsetHeight / 2);
+            const left = tileRect.left - boardRect.left + (tileRect.width / 2) - (pawn.offsetWidth / 2);
+
+            pawn.style.top = `${top}px`;
+            pawn.style.left = `${left}px`;
+
+            document.querySelectorAll('.tile').forEach(t => t.classList.remove('tile-active'));
+            tile.classList.add('tile-active');
+        }
+
+        function movePlayerSteps(steps) {
+            let currentStep = 0;
+            const startPos = gameState.position;
+
+            const moveInterval = setInterval(() => {
+                gameState.position = (gameState.position + 1) % BOARD_TILES.length;
+                currentStep++;
+
+                if (gameState.position === 0) {
+                    gameState.money += 2000;
+                    audio.playWinSound();
+                    addLog(`🎉 跨越桃園機場起點！獲得台灣旅遊補助 <b>+$2,000</b>`, 'emerald');
+                }
+
+                audio.playStepSound();
+                updatePawnPosition(gameState.position);
+                updateUI();
+
+                if (currentStep >= steps) {
+                    clearInterval(moveInterval);
+                    gameState.isRolling = false;
+                    document.getElementById('btn-roll').disabled = false;
+                    gameState.turn++;
+                    
+                    drawTravelPath(startPos, gameState.position);
+                    
+                    setTimeout(() => {
+                        handleTileLanding(gameState.position);
+                    }, 300);
+                }
+            }, 300);
+        }
+
+        function highlightCountyOnMap(countyName) {
+            document.querySelectorAll('.county-path').forEach(path => {
+                if (path.getAttribute('data-county') === countyName) {
+                    path.classList.add('active');
+                } else {
+                    path.classList.remove('active');
+                }
+            });
+
+            document.querySelectorAll('.map-pin').forEach((pin, idx) => {
+                if (BOARD_TILES[idx].county === countyName || idx === gameState.position) {
+                    pin.classList.add('active-pin');
+                } else {
+                    pin.classList.remove('active-pin');
+                }
+            });
+        }
+
+        function updateMapOverlayCard(tile) {
+            const badge = document.getElementById('spot-region-badge');
+            const county = document.getElementById('spot-county-name');
+            const name = document.getElementById('spot-name');
+            const desc = document.getElementById('spot-desc');
+            const icon = document.getElementById('spot-icon');
+            const overlayImg = document.getElementById('spot-overlay-img');
+
+            if (badge) badge.innerText = tile.region;
+            if (county) county.innerText = tile.county;
+            if (name) name.innerText = tile.name;
+            if (desc) desc.innerText = tile.desc;
+            if (icon) icon.className = `fa-solid ${tile.icon} text-sky-600`;
+            if (overlayImg && tile.img) overlayImg.src = tile.img;
+
+            const currentLocText = document.getElementById('current-location-text');
+            if (currentLocText) currentLocText.innerText = `目前位置：${tile.name} (${tile.county})`;
+
+            const stampStatus = document.getElementById('spot-stamp-status');
+            if (stampStatus) {
+                if (gameState.stamps.has(tile.id)) {
+                    stampStatus.className = 'text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 font-bold';
+                    stampStatus.innerHTML = `<i class="fa-solid fa-circle-check"></i> 已解鎖集章`;
+                } else {
+                    stampStatus.className = 'text-slate-400 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200 font-bold';
+                    stampStatus.innerHTML = `<i class="fa-regular fa-circle"></i> 未解鎖集章`;
+                }
+            }
+        }
+
+        function showCountyInfoFromMap(countyName) {
+            const tile = BOARD_TILES.find(t => t.county === countyName);
+            if (tile) {
+                highlightCountyOnMap(countyName);
+                updateMapOverlayCard(tile);
+                openSpotModal(tile);
+            }
+        }
+
+        function onTileClick(tileIndex) {
+            const tile = BOARD_TILES[tileIndex];
+            highlightCountyOnMap(tile.county);
+            updateMapOverlayCard(tile);
+            openSpotModal(tile);
+        }
+
+        function openSpotModal(spot = null) {
+            const tile = spot || BOARD_TILES[gameState.position];
+
+            document.getElementById('modal-spot-county').innerText = tile.county;
+            document.getElementById('modal-spot-title').innerText = tile.name;
+            document.getElementById('modal-spot-tagline').innerText = `「${tile.desc}」`;
+            document.getElementById('modal-spot-desc').innerText = tile.desc;
+            document.getElementById('modal-spot-fact').innerText = tile.fact;
+            document.getElementById('modal-spot-icon').className = `fa-solid ${tile.icon}`;
+            document.getElementById('modal-spot-ticket').innerText = tile.price > 0 ? `打卡花費: $${tile.price}` : '特別站點';
+
+            const modalImg = document.getElementById('modal-spot-img');
+            if (modalImg && tile.img) {
+                modalImg.src = tile.img;
+            }
+
+            const checkinBtn = document.getElementById('modal-btn-checkin');
+            if (tile.type !== 'spot') {
+                checkinBtn.innerText = '特殊事件站';
+                checkinBtn.disabled = true;
+                checkinBtn.className = 'flex-1 py-3 bg-slate-200 text-slate-500 font-extrabold text-xs rounded-xl cursor-not-allowed';
+            } else if (gameState.stamps.has(tile.id)) {
+                checkinBtn.innerText = '已解鎖打卡';
+                checkinBtn.disabled = true;
+                checkinBtn.className = 'flex-1 py-3 bg-slate-200 text-slate-500 font-extrabold text-xs rounded-xl cursor-not-allowed';
+            } else {
+                checkinBtn.innerHTML = `<i class="fa-solid fa-stamp"></i> 打卡集章 ($${tile.price})`;
+                checkinBtn.disabled = false;
+                checkinBtn.className = 'flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1';
+            }
+
+            const modal = document.getElementById('spot-modal');
+            const content = document.getElementById('spot-modal-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeSpotModal() {
+            const modal = document.getElementById('spot-modal');
+            const content = document.getElementById('spot-modal-content');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 150);
+        }
+
+        function renderPassportStamps() {
+            const grid = document.getElementById('stamps-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const spotTiles = BOARD_TILES.filter(t => t.type === 'spot');
+
+            spotTiles.forEach(tile => {
+                const isCollected = gameState.stamps.has(tile.id);
+                const card = document.createElement('div');
+                card.className = `p-2.5 rounded-2xl border flex flex-col items-center justify-center text-center transition cursor-pointer hover:scale-105 ${
+                    isCollected 
+                        ? 'bg-amber-50/90 border-amber-300 shadow-sm' 
+                        : 'bg-slate-50 border-slate-200 opacity-60 grayscale'
+                }`;
+
+                card.onclick = () => openSpotModal(tile);
+
+                card.innerHTML = `
+                    <div class="relative w-full h-20 rounded-xl overflow-hidden mb-2 border border-slate-200 shadow-inner">
+                        <img src="${tile.img}" alt="${tile.name}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/200x200/0284c7/ffffff?text=Taiwan';" />
+                        <div class="absolute inset-0 bg-black/20"></div>
+                        <div class="absolute top-1 right-1 w-6 h-6 rounded-full ${isCollected ? 'bg-rose-500 text-white' : 'bg-slate-700/80 text-slate-300'} flex items-center justify-center text-[10px] shadow">
+                            <i class="fa-solid ${tile.icon}"></i>
+                        </div>
+                    </div>
+                    <span class="font-extrabold text-xs text-slate-800 line-clamp-1">${tile.name}</span>
+                    <span class="text-[10px] text-slate-500 font-bold">${tile.county}</span>
+                    <span class="mt-1 text-[9px] px-2 py-0.5 rounded-full ${isCollected ? 'bg-rose-100 text-rose-700 font-black' : 'bg-slate-200 text-slate-500'}">
+                        ${isCollected ? '已集章' : '未解鎖'}
+                    </span>
+                `;
+
+                grid.appendChild(card);
+            });
+
+            const progress = Math.round((gameState.stamps.size / spotTiles.length) * 100);
+            const progressEl = document.getElementById('passport-progress');
+            if (progressEl) progressEl.innerText = `進度：${progress}%`;
+        }
+
+        function updateUI() {
+            document.getElementById('player-money').innerText = `$${gameState.money.toLocaleString()}`;
+            document.getElementById('player-stamps').innerText = `${gameState.stamps.size} / 16`;
+            document.getElementById('game-turn').innerText = `第 ${gameState.turn} 天`;
+
+            const currentTile = BOARD_TILES[gameState.position];
+            const btnCheckin = document.getElementById('btn-checkin');
+            const btnSouvenir = document.getElementById('btn-souvenir');
+
+            if (currentTile.type === 'spot') {
+                btnCheckin.disabled = gameState.stamps.has(currentTile.id);
+                btnSouvenir.disabled = false;
+            } else {
+                btnCheckin.disabled = true;
+                btnSouvenir.disabled = true;
+            }
+        }
+
+        function addLog(text, color = 'slate') {
+            const log = document.getElementById('game-log');
+            if (!log) return;
+            const entry = document.createElement('div');
+            
+            const bgClasses = {
+                emerald: 'bg-emerald-50 border-emerald-500 text-emerald-900',
+                sky: 'bg-sky-50 border-sky-500 text-sky-900',
+                rose: 'bg-rose-50 border-rose-500 text-rose-900',
+                amber: 'bg-amber-50 border-amber-500 text-amber-900',
+                indigo: 'bg-indigo-50 border-indigo-500 text-indigo-900',
+                slate: 'bg-slate-50 border-slate-400 text-slate-800'
+            };
+
+            entry.className = `p-2 border-l-4 rounded-r-lg ${bgClasses[color] || bgClasses.slate} transition-all`;
+            entry.innerHTML = `<span class="text-[10px] text-slate-400 font-mono">第${gameState.turn}天</span> ${text}`;
+            
+            log.prepend(entry);
+        }
+
+        function clearLog() {
+            document.getElementById('game-log').innerHTML = '';
+        }
+
+        function switchMobileTab(tab) {
+            const boardView = document.getElementById('board-view');
+            const passportView = document.getElementById('passport-view');
+
+            const btnBoard = document.getElementById('tab-btn-board');
+            const btnPassport = document.getElementById('tab-btn-passport');
+
+            if (tab === 'board' || tab === 'map') {
+                boardView?.classList.remove('hidden');
+                passportView?.classList.add('hidden');
+                btnBoard?.classList.add('bg-emerald-500', 'text-white');
+                btnPassport?.classList.remove('bg-emerald-500', 'text-white');
+            } else if (tab === 'passport') {
+                boardView?.classList.add('hidden');
+                passportView?.classList.remove('hidden');
+                btnPassport?.classList.add('bg-emerald-500', 'text-white');
+                btnBoard?.classList.remove('bg-emerald-500', 'text-white');
+            }
+        }
+
+        function resetGameModal() {
+            gameState = {
+                money: 10000,
+                position: 0,
+                turn: 1,
+                stamps: new Set(),
+                souvenirs: new Set(),
+                isRolling: false,
+                audioMuted: gameState.audioMuted
+            };
+
+            document.querySelectorAll('[id^="tile-stamp-badge-"]').forEach((el, idx) => {
+                const tile = BOARD_TILES[idx];
+                el.innerText = tile.price > 0 ? '$' + tile.price : '特殊';
+                el.className = 'text-[9px] font-bold text-slate-500';
+            });
+
+            updatePawnPosition(0);
+            updateUI();
+            renderPassportStamps();
+            clearLog();
+            addLog('🔄 遊戲已重新開始！祝您環島之旅愉快。', 'sky');
+        }
+
+        window.addEventListener('resize', () => {
+            updatePawnPosition(gameState.position, false);
+        });
+    </script>
+</body>
+</html>

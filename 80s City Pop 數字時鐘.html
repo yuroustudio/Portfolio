@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>80s City Pop 數字時鐘</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for 80s City Pop & Retro Synth Styles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Righteous&family=Share+Tech+Mono&family=Outfit:wght@600;800&family=Noto+Sans+TC:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            user-select: none;
+            overflow: hidden;
+            background-color: #0d0221;
+        }
+
+        /* 3 Distinct 80s City Pop Font Styles */
+        .font-style-synth {
+            font-family: 'Righteous', cursive;
+            letter-spacing: 0.06em;
+        }
+
+        .font-style-tech {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 0.08em;
+        }
+
+        .font-style-retro {
+            font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 0.04em;
+        }
+
+        /* Smooth Crossfade for Vector Art Layers */
+        .bg-layer {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            transition: opacity 1.8s ease-in-out, transform 1.8s ease-in-out;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .bg-hidden {
+            opacity: 0;
+            transform: scale(1.04);
+            pointer-events: none;
+        }
+
+        .bg-visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Glassmorphism Buttons */
+        .glass-btn {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.25s ease;
+        }
+
+        .glass-btn:hover {
+            background: rgba(255, 0, 128, 0.25);
+            border-color: rgba(0, 240, 255, 0.6);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .glass-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Multi-layered High-Contrast Neon Glow for Floating Digits */
+        .neon-glow-pink {
+            text-shadow: 
+                0 0 10px #ff2a8d,
+                0 0 20px #ff2a8d,
+                0 0 40px #ff007f,
+                0 0 80px #b000ff,
+                0 0 120px rgba(0, 0, 0, 0.9);
+        }
+
+        .neon-glow-cyan {
+            text-shadow: 
+                0 0 8px #00f0ff,
+                0 0 18px #00f0ff,
+                0 0 35px #00a2ff,
+                0 0 70px rgba(0, 0, 0, 0.9);
+        }
+
+        /* Ambient floating effect for floating clock text */
+        @keyframes subtleFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .animate-float {
+            animation: subtleFloat 6s ease-in-out infinite;
+        }
+
+        /* Audio Disk Spinning Indicator */
+        @keyframes spinSlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .spin-music {
+            animation: spinSlow 4s linear infinite;
+        }
+    </style>
+</head>
+<body class="w-screen h-screen relative flex items-center justify-center text-white overflow-hidden">
+
+    <!-- Audio Element for City Pop Background Music -->
+    <audio id="bgMusic" loop preload="auto" src="https://img.ai365.fans/artworks/603e0317-643b-4a0a-a0c4-dbaa9074f6b7/5z5novpncfm.mp3"></audio>
+
+    <!-- Dynamic SVG 80s City Pop Background Layer A -->
+    <div id="bgLayerA" class="bg-layer bg-visible flex items-center justify-center"></div>
+    
+    <!-- Dynamic SVG 80s City Pop Background Layer B -->
+    <div id="bgLayerB" class="bg-layer bg-hidden flex items-center justify-center"></div>
+
+    <!-- Vignette Tint Overlay for Depth & Readability -->
+    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-slate-950/50 pointer-events-none z-10"></div>
+
+    <!-- Top Navigation Controls Header -->
+    <header class="absolute top-0 left-0 right-0 p-4 md:p-6 flex justify-between items-center z-30">
+        <!-- Title & Theme Badge -->
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-pink-500/20 border border-pink-400/40 flex items-center justify-center backdrop-blur-md shadow-lg shadow-pink-500/20">
+                <i class="fa-solid fa-compact-disc text-pink-400 text-xl" id="musicDiscIcon"></i>
+            </div>
+            <div>
+                <h1 class="text-xs md:text-sm font-bold tracking-widest text-pink-300 uppercase drop-shadow">80s City Pop 時計</h1>
+                <div class="flex items-center gap-2">
+                    <span id="sceneTitle" class="text-sm md:text-base font-extrabold text-white drop-shadow-md">霓虹都市與粉紅夕陽</span>
+                    <span class="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-200 border border-cyan-400/30 backdrop-blur-sm" id="sceneCounter">1 / 12</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Controls -->
+        <div class="flex items-center gap-2 md:gap-3">
+            <!-- City Pop Background Music Button -->
+            <button id="musicBtn" title="播放 / 暫停 City Pop 背景音樂" class="glass-btn px-3.5 py-2 md:px-4 md:py-2.5 rounded-xl flex items-center gap-2 text-xs md:text-sm font-semibold tracking-wider text-pink-200 hover:text-white">
+                <i class="fa-solid fa-music text-pink-400" id="musicIcon"></i>
+                <span id="musicLabel" class="hidden sm:inline">背景音樂 : OFF</span>
+            </button>
+
+            <!-- Manual Change Scene Prev/Next -->
+            <div class="flex items-center rounded-xl glass-btn p-1 gap-1">
+                <button id="prevBgBtn" title="上一張插畫" class="w-8 h-8 md:w-9 md:h-9 rounded-lg flex items-center justify-center hover:bg-white/20 text-white transition">
+                    <i class="fa-solid fa-chevron-left text-xs md:text-sm"></i>
+                </button>
+                <button id="nextBgBtn" title="下一張插畫" class="w-8 h-8 md:w-9 md:h-9 rounded-lg flex items-center justify-center hover:bg-white/20 text-white transition">
+                    <i class="fa-solid fa-chevron-right text-xs md:text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Theme Gallery Button -->
+            <button id="galleryToggleBtn" title="City Pop 圖库" class="glass-btn px-3 py-2 md:px-4 md:py-2.5 rounded-xl flex items-center gap-2 text-xs md:text-sm font-semibold">
+                <i class="fa-solid fa-images text-cyan-300"></i>
+                <span class="hidden sm:inline">圖庫</span>
+            </button>
+
+            <!-- Font Switcher Button -->
+            <button id="fontBtn" title="切換字體風格" class="glass-btn px-3 py-2 md:px-4 md:py-2.5 rounded-xl flex items-center gap-2 text-xs md:text-sm font-semibold tracking-wider">
+                <i class="fa-solid fa-font text-cyan-300"></i>
+                <span id="fontLabel" class="hidden sm:inline">霓虹流行</span>
+            </button>
+
+            <!-- Format Toggle -->
+            <button id="formatBtn" title="切換 12/24 小時制" class="glass-btn px-3 py-2 md:px-4 md:py-2.5 rounded-xl text-xs md:text-sm font-bold tracking-wider text-cyan-200">
+                24H
+            </button>
+
+            <!-- Fullscreen Toggle -->
+            <button id="fullscreenBtn" title="全螢幕模式" class="glass-btn w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center text-slate-200 hover:text-white">
+                <i class="fa-solid fa-expand text-base" id="fullscreenIcon"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Floating Digital Clock Display (No Card Background Mask) -->
+    <main class="relative z-20 flex flex-col items-center justify-center px-4 w-full max-w-5xl animate-float">
+        
+        <!-- Date & Day Display Floating -->
+        <div class="flex flex-wrap items-center justify-center gap-2 md:gap-4 mb-2 md:mb-4 font-bold tracking-widest text-base md:text-2xl uppercase neon-glow-cyan">
+            <span id="dateDisplay">2026 年 08 月 10 日</span>
+            <span class="w-2 h-2 rounded-full bg-cyan-300 inline-block"></span>
+            <span id="dayDisplay" class="text-pink-300">星期一</span>
+        </div>
+
+        <!-- Main Time Digits (Direct Floating Text) -->
+        <div id="clockContainer" class="flex items-baseline justify-center neon-glow-pink tracking-tight font-style-synth my-2">
+            <span id="clockHours" class="text-7xl sm:text-9xl md:text-[11rem] font-black leading-none">12</span>
+            <span class="text-6xl sm:text-8xl md:text-[9rem] font-light text-cyan-300 mx-1 md:mx-3 animate-pulse leading-none">:</span>
+            <span id="clockMinutes" class="text-7xl sm:text-9xl md:text-[11rem] font-black leading-none">00</span>
+            
+            <div class="flex flex-col items-start ml-2 sm:ml-5">
+                <span id="ampmDisplay" class="text-sm sm:text-xl md:text-2xl font-bold tracking-widest text-cyan-300 mb-1 hidden neon-glow-cyan">AM</span>
+                <span id="clockSeconds" class="text-3xl sm:text-5xl md:text-6xl font-extrabold text-cyan-200 neon-glow-cyan leading-none">00</span>
+            </div>
+        </div>
+
+        <!-- Bottom Status Bar & Minute Progress Bar -->
+        <div class="mt-6 md:mt-10 w-full max-w-xl flex flex-col sm:flex-row items-center justify-between text-xs md:text-sm font-semibold text-cyan-100 gap-3 backdrop-blur-md bg-slate-950/40 px-5 py-2.5 rounded-full border border-white/10">
+            <div class="flex items-center gap-2">
+                <i class="fa-regular fa-clock text-pink-400"></i>
+                <span>自動切換：<strong id="countdownText" class="text-pink-300 font-mono text-base">60</strong> 秒</span>
+            </div>
+            <!-- Progress Bar for Current Minute -->
+            <div class="w-full sm:w-56 bg-slate-900/80 h-2.5 rounded-full overflow-hidden border border-white/20 p-0.5">
+                <div id="minuteProgressBar" class="bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-400 h-full w-0 transition-all duration-300 ease-linear rounded-full"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- City Pop Illustration Gallery Modal -->
+    <div id="galleryModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-xl z-50 flex flex-col justify-end sm:justify-center items-center p-4 sm:p-6 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-slate-900/90 border border-pink-500/30 w-full max-w-5xl max-h-[85vh] rounded-2xl md:rounded-3xl p-5 md:p-8 flex flex-col shadow-2xl shadow-pink-500/10">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-palette text-2xl text-pink-400"></i>
+                    <div>
+                        <h2 class="text-lg md:text-xl font-extrabold text-white">80s City Pop 插畫畫廊</h2>
+                        <p class="text-xs md:text-sm text-cyan-200/80">每一分鐘自動輪播，點選可立即換圖</p>
+                    </div>
+                </div>
+                <button id="closeGalleryBtn" class="w-10 h-10 rounded-full glass-btn flex items-center justify-center text-slate-300 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Gallery Grid -->
+            <div id="galleryGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4 overflow-y-auto pr-2">
+                <!-- Injected dynamically via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Message -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900/90 border border-pink-500/40 px-6 py-3 rounded-full text-xs md:text-sm font-semibold text-pink-200 flex items-center gap-3 opacity-0 pointer-events-none transition-all duration-300 shadow-xl shadow-pink-500/20">
+        <i class="fa-solid fa-sparkles text-pink-400" id="toastIcon"></i>
+        <span id="toastMessage">切換成功</span>
+    </div>
+
+    <!-- JavaScript Engine -->
+    <script>
+        // 12 High Quality 80s City Pop Vector Preset Scenes
+        const cityPopIllustrations = [
+            {
+                id: 1,
+                title: "霓虹都市與粉紅夕陽",
+                desc: "經典 City Pop 棕櫚樹斜陽與條紋復古太陽",
+                svg: `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" class="w-full h-full object-cover">
+                    <defs>
+                        <linearGradient id="cp1_bg" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#2d004b" />
+                            <stop offset="40%" stop-color="#7b0057" />
+                            <stop offset="70%" stop-color="#ff007f" />
+                            <stop offset="100%" stop-color="#ff7b00" />
+                        </linearGradient>
+                        <linearGradient id="cp1_sun" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#ffe600" />
+                            <stop offset="100%" stop-color="#ff007f" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#cp1_bg)" />
+                    <!-- Striped Synthwave Sun -->
+                    <circle cx="960" cy="520" r="220" fill="url(#cp1_sun)" />
+                    <g fill="#7b0057">
+                        <rect x="700" y="520" width="520" height="8" />
+                        <rect x="700" y="540" width="520" height="12" />
+                        <rect x="700" y="565" width="520" height="16" />
+                        <rect x="700" y="595" width="520" height="22" />
+                        <rect x="700" y="630" width="520" height="28" />
+                        <rect x="700" y="670" width="520" height="36" />
+                    </g>
+                    <!-- Wireframe Horizon Grid Sea -->
+                    <path d="M0,700 L1920,700 L1920,1080 L0,1080 Z" fill="#120024" />
+                    <g stroke="#00f0ff" stroke-width="1.5" opacity="0.6">
+                        <line x1="0" y1="700" x2="1920" y2="700" />
+                        <line x1="0" y1="730" x2="1920" y2="730" />
+                        <line x1="0" y1="770" x2="1920" y2="770" />
+                        <line x1="0" y1="830" x2="1920" y2="830" />
+                        <line x1="0" y1="910" x2="1920" y2="910" />
+                        <line x1="0" y1="1010" x2="1920" y2="1010" />
+                        <!-- Perspective grid lines -->
+                        <line x1="960" y1="700" x2="960" y2="1080" />
+                        <line x1="960" y1="700" x2="600" y2="1080" />
+                        <line x1="960" y1="700" x2="200" y2="1080" />
+                        <line x1="960" y1="700" x2="-200" y2="1080" />
+                        <line x1="960" y1="700" x2="1320" y2="1080" />
+                        <line x1="960" y1="700" x2="1720" y2="1080" />
+                        <line x1="960" y1="700" x2="2120" y2="1080" />
+                    </g>
+                    <!-- Palm Tree Silhouettes -->
+                    <g fill="#0b001a">
+                        <path d="M120,1080 Q220,750 280,480 L320,485 Q260,750 160,1080 Z" />
+                        <path d="M300,480 Q200,380 80,420 Q200,450 300,480 Z" />
+                        <path d="M300,480 Q400,360 520,390 Q400,440 300,480 Z" />
+                        <path d="M300,480 Q420,470 540,550 Q390,520 300,480 Z" />
+                        <path d="M300,480 Q200,530 100,600 Q210,540 300,480 Z" />
+                    </g>
+                </svg>
+                `
+            },
+            {
+                id: 2,
+                title: "東京夜馳首都高",
+                desc: "深夜高速公路流光與極簡霓虹高樓大廈群",
+                svg: `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" class="w-full h-full object-cover">
+                    <defs>
+                        <linearGradient id="cp2_bg" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#050110" />
+                            <stop offset="60%" stop-color="#1a0033" />
+                            <stop offset="100%" stop-color="#001833" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#cp2_bg)" />
+                    <!-- Skyline Skyscrapers -->
+                    <g fill="#0c021e">
+                        <rect x="100" y="300" width="140" height="780" />
+                        <rect x="280" y="200" width="180" height="880" />
+                        <rect x="500" y="380" width="120" height="700" />
+                        <rect x="1200" y="250" width="200" height="830" />
+                        <rect x="1450" y="320" width="150" height="760" />
+                        <rect x="1640" y="180" width="180" height="900" />
+                    </g>
+                    <!-- Neon Building Edges -->
+                    <g stroke="#ff007f" stroke-width="3" fill="none" opacity="0.8">
+                        <line x1="280" y1="200" x2="460" y2="200" />
+                        <line x1="1640" y1="180" x2="1820" y2="180" />
+                        <line x1="100" y1="300" x2="240" y2="300" />
+                    </g>
+                    <g stroke="#00f0ff" stroke-width="3" fill="none" opacity="0.8">
+                        <line x1="1200" y1="250" x2="1400" y2="250" />
+                        <line x1="500" y1="380" x2="620" y2="380" />
+                    </g>
+                    <!-- Highway Perspective Light Trails -->
+                    <polygon points="960,600 0,1080 1920,1080" fill="#080014" />
+                    <polygon points="960,600 900,1080 940,1080" fill="#ff0055" opacity="0.9" />
+                    <polygon points="960,600 800,1080 840,1080" fill="#ff0055" opacity="0.8" />
+                    <polygon points="960,600 1020,1080 1060,1080" fill="#00f0ff" opacity="0.9" />
+                    <polygon points="960,600 1120,1080 1160,1080" fill="#00f0ff" opacity="0.8" />
+                </svg>
+                `
+            },
+            {
+                id: 3,
+                title: "湘南海岸夕照敞篷車",
+                desc: "迎著海風沿著海岸線馳騁，熱帶椰林與金黃日落",
+                svg: `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" class="w-full h-full object-cover">
+                    <defs>
+                        <linearGradient id="cp3_bg" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#ff5e62" />
+                            <stop offset="50%" stop-color="#ff9966" />
+                            <stop offset="100%" stop-color="#2c1654" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#cp3_bg)" />
+                    <!-- Giant Sun -->
+                    <circle cx="960" cy="480" r="190" fill="#fff5cc" />
+                    <!-- Ocean & Shore -->
+                    <path d="M0,620 Q480,590 960,620 T1920,620 L1920,1080 L0,1080 Z" fill="#1f0c38" />
+                    <path d="M0,620 Q480,590 960,620 T1920,620" stroke="#ff9966" stroke-width="4" fill="none" opacity="0.6" />
+                    <!-- Retro Sports Car Silhouette -->
+                    <g fill="#0a0314" transform="translate(1050, 720) scale(1.1)">
+                        <path d="M0,80 L40,40 L160,35 L260,50 L380,55 L420,85 L0,85 Z" />
+                        <circle cx="80" cy="85" r="28" />
+                        <circle cx="320" cy="85" r="28" />
+                        <circle cx="80" cy="85" r="14" fill="#ff9966" />
+                        <circle cx="320" cy="85" r="14" fill="#ff9966" />
+                    </g>
+                </svg>
+                `
+            },
+            {
+                id: 4,
+                title: "賽博霓虹未來都市",
+                desc: "充滿紫粉電光與幾何線條的賽博龐克 City Pop 世界",
+                svg: `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" class="w-full h-full object-cover">
+                    <defs>
+                        <linearGradient id="cp4_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#3b0066" />
+                            <stop offset="50%" stop-color="#110022" />
+                            <stop offset="100%" stop-color="#002b4d" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#cp4_bg)" />
+                    <!-- Grid Mountains -->
+                    <polygon points="-100,750 400,450 800,750" fill="#180033" stroke="#ff00aa" stroke-width="2" />
+                    <polygon points="600,750 1100,380 1600,750" fill="#120026" stroke="#00f0ff" stroke-width="2" />
+                    <polygon points="1200,750 1600,480 2000,750" fill="#180033" stroke="#ff00aa" stroke-width="2" />
+                    <!-- Neon Floor -->
+                    <rect x="0" y="750" width="1920" height="330" fill="#080012" />
+                    <path d="M0,750 L1920,750" stroke="#00f0ff" stroke-width="4" />
+                </svg>
+                `
+            },
+            {
+                id: 5,
+                title: "卡帶記憶與懷舊夏日",
+                desc: "80 年代卡式錄音帶與蒸汽波風格海灘浪潮",
+                svg: `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" class="w-full h-full object-cover">
+                    <defs>
+                        <linearGradient id="cp5_bg" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#20002c" />
+                            <stop offset="100%" stop-color="#cbb4d4" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#cp5_bg)" />
+                    <circle cx="1400" cy="300" r="140" fill="#ff007f" opacity="0.8" />
+                    <circle cx="1400" cy="300" r="180" fill="#00f0ff" opacity="0.3" />
+                    <!-- Waves -->
+                    <path d="M0,650 C400,550 800,750 1200,600 C1600,450 1800,650 1920,600 L1920,1080 L0,1080 Z" fill="#150024" />
+                    <path d="M0,750 C500,680 900,820 1400,700 C1700,630 1850,720 1920,700 L1920,1080 L0,1080 Z" fill="#090012" />
+                </svg>
+                `
+            },
+            {
+                id: 6,
+                title: "碼頭明月與紫羅蘭波光",
+                desc: "浪漫港灣夜色，紫羅蘭色月光在水面上泛起層層漣漪",
+                svg: `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" class="w-full h-full object-cover">
+                    <defs>
+                        <linearGradient id="cp6_bg" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#0f051d" />
+                            <stop offset="50%" stop-color="#291147" />
+                            <stop offset="100%" stop-color="#4a154b" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#cp6_bg)" />
+                    <!-- Neon Moon -->
+                    <circle cx="450" cy="280" r="100" fill="#f43f5e" />
+                    <circle cx="450" cy="280" r="130" fill="#f43f5e" opacity="0.3" />
+                    <!-- Horizon Sea -->
+                    <rect x="0" y="580" width="1920" height="500" fill="#0a0214" />
+                    <path d="M0,580 L1920,580" stroke="#f43f5e" stroke-width="3" />
+                    <!-- Water Glow Lines -->
+                    <line x1="300" y1="640" x2="600" y2="640" stroke="#ff79c6" stroke-width="3" opacity="0.8" />
+                    <line x1="200" y1="720" x2="700" y2="720" stroke="#ff79c6" stroke-width="4" opacity="0.6" />
+                    <line x1="100" y1="840" x2="800" y2="840" stroke="#ff79c6" stroke-width="5" opacity="0.4" />
+                </svg>
+                `
+            },
+            {
+                id: 7,
+                title: "落日公路與夕陽丘陵",
+                desc: "熱帶公路直通遠方漸層夕陽，溫暖迷幻的 80 年代景色",
+                svg: `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" class="w-full h-full object-cover">
+                    <defs>
+                        <linearGradient id="cp7_bg" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#ff758c" />
+                            <stop offset="100%" stop-color="#ff7eb3" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#cp7_bg)" />
+                    <circle cx="960" cy="500" r="200" fill="#ffea79" />
+                    <!-- Hills -->
+                    <path d="M0,650 Q450,520 960,650 T1920,650 L1920,1080 L0,1080 Z" fill="#2b0036" />
+                </svg>
+                `
+            },
+            {
+                id: 8,
+                title: "棕櫚渡假村夜色",
+                desc: "泳池波光與霓虹粉光倒影，優雅舒適的夏日夜派對",
+                svg: `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" class="w-full h-full object-cover">
+                    <defs>
+                        <linearGradient id="cp8_bg" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#02111b" />
+                            <stop offset="100%" stop-color="#3f2b96" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#cp8_bg)" />
+                    <polygon points="0,680 1920,680 1920,1080 0,1080" fill="#00e5ff" opacity="0.3" />
+                    <path d="M0,680 L1920,680" stroke="#00f0ff" stroke-width="4" />
+                </svg>
+                `
+            },
+            {
+                id: 9,
+                title: "新宿雨後霓虹招牌",
+                desc: "繁華街頭倒影與日系霓虹招牌堆疊出的微醺氛圍",
+                svg: `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" class="w-full h-full object-cover">
+                    <defs>
+                        <linearGradient id="cp9_bg" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#080014" />
+                            <stop offset="100%" stop-color="#1f002b" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#cp9_bg)" />
+                    <!-- Vertical Neon Signboard Blocks -->
+                    <rect x="250" y="150" width="80" height="400" fill="#ff0055" opacity="0.8" rx="10" />
+                    <rect x="360" y="220" width="70" height="300" fill="#00f0ff" opacity="0.8" rx="10" />
+                    <rect x="1500" y="180" width="90" height="420" fill="#ffe600" opacity="0.8" rx="10" />
+                    <rect x="1620" y="260" width="70" height="320" fill="#a855f7" opacity="0.8" rx="10" />
+                    <!-- Wet Ground Reflection -->
+                    <rect x="0" y="700" width="1920" height="380" fill="#05000a" />
+                    <ellipse cx="290" cy="880" rx="120" ry="15" fill="#ff0055" opacity="0.4" />
+                    <ellipse cx="395" cy="850" rx="90" ry="12" fill="#00f0ff" opacity="0.4" />
+                    <ellipse cx="1545" cy="890" rx="130" ry="16" fill="#ffe600" opacity="0.4" />
+                </svg>
+                `
+            },
+            {
+                id: 10,
+                title: "Outrun 無限網格地平線",
+                desc: "極速跑車視角，衝向無限延伸的 80s 賽博金屬網格",
+                svg: `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" class="w-full h-full object-cover">
+                    <defs>
+                        <linearGradient id="cp10_bg" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#140024" />
+                            <stop offset="50%" stop-color="#420042" />
+                            <stop offset="100%" stop-color="#ff0066" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#cp10_bg)" />
+                    <polygon points="0,600 1920,600 1920,1080 0,1080" fill="#0a0014" />
+                    <line x1="0" y1="600" x2="1920" y2="600" stroke="#00f0ff" stroke-width="4" />
+                </svg>
+                `
+            },
+            {
+                id: 11,
+                title: "黃昏濱海大道長廊",
+                desc: "金黃與粉紫交織的微風夕照，沿著海岸延伸的路燈長廊",
+                svg: `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" class="w-full h-full object-cover">
+                    <defs>
+                        <linearGradient id="cp11_bg" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#f97316" />
+                            <stop offset="50%" stop-color="#ec4899" />
+                            <stop offset="100%" stop-color="#3b0764" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#cp11_bg)" />
+                    <circle cx="960" cy="520" r="160" fill="#fef08a" />
+                    <path d="M0,660 Q480,630 960,660 T1920,660 L1920,1080 L0,1080 Z" fill="#1e1b4b" />
+                </svg>
+                `
+            },
+            {
+                id: 12,
+                title: "星穹土星與霓虹幻境",
+                desc: "夢幻蒸氣波宇宙，巨大的星環與夜光海面相呼應",
+                svg: `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" class="w-full h-full object-cover">
+                    <defs>
+                        <linearGradient id="cp12_bg" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#030712" />
+                            <stop offset="60%" stop-color="#1e1035" />
+                            <stop offset="100%" stop-color="#3b0764" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#cp12_bg)" />
+                    <!-- Giant Planet with Rings -->
+                    <ellipse cx="1300" cy="320" rx="220" ry="40" fill="none" stroke="#38bdf8" stroke-width="8" transform="rotate(-15 1300 320)" opacity="0.7" />
+                    <circle cx="1300" cy="320" r="110" fill="#c084fc" />
+                    <!-- Water -->
+                    <rect x="0" y="650" width="1920" height="430" fill="#090314" />
+                    <path d="M0,650 L1920,650" stroke="#c084fc" stroke-width="3" />
+                </svg>
+                `
+            }
+        ];
+
+        let currentIndex = 0;
+        let activeLayer = 'A';
+        let is24Hour = true;
+        let lastMinute = -1;
+        let isMusicPlaying = false;
+
+        // Font options configuration
+        const fontOptions = [
+            { id: 'font-style-synth', name: '霓虹流行', fontName: 'Righteous' },
+            { id: 'font-style-tech', name: '科技未來', fontName: 'Orbitron' },
+            { id: 'font-style-retro', name: '復古數字', fontName: 'Share Tech Mono' }
+        ];
+        let currentFontIndex = 0;
+
+        // DOM elements
+        const bgMusic = document.getElementById('bgMusic');
+        const bgLayerA = document.getElementById('bgLayerA');
+        const bgLayerB = document.getElementById('bgLayerB');
+        const sceneTitle = document.getElementById('sceneTitle');
+        const sceneCounter = document.getElementById('sceneCounter');
+        
+        const clockContainer = document.getElementById('clockContainer');
+        const clockHours = document.getElementById('clockHours');
+        const clockMinutes = document.getElementById('clockMinutes');
+        const clockSeconds = document.getElementById('clockSeconds');
+        const ampmDisplay = document.getElementById('ampmDisplay');
+        const dateDisplay = document.getElementById('dateDisplay');
+        const dayDisplay = document.getElementById('dayDisplay');
+        const countdownText = document.getElementById('countdownText');
+        const minuteProgressBar = document.getElementById('minuteProgressBar');
+        const fontBtn = document.getElementById('fontBtn');
+        const fontLabel = document.getElementById('fontLabel');
+
+        const galleryModal = document.getElementById('galleryModal');
+        const galleryGrid = document.getElementById('galleryGrid');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+
+        function setBackground(index, isUserAction = false) {
+            currentIndex = index;
+            const data = cityPopIllustrations[currentIndex];
+
+            const targetLayer = activeLayer === 'A' ? bgLayerB : bgLayerA;
+            const currentLayer = activeLayer === 'A' ? bgLayerA : bgLayerB;
+
+            targetLayer.innerHTML = data.svg;
+            
+            targetLayer.classList.remove('bg-hidden');
+            targetLayer.classList.add('bg-visible');
+            
+            currentLayer.classList.remove('bg-visible');
+            currentLayer.classList.add('bg-hidden');
+
+            activeLayer = activeLayer === 'A' ? 'B' : 'A';
+
+            // Update UI Labels
+            sceneTitle.innerText = data.title;
+            sceneCounter.innerText = `${currentIndex + 1} / ${cityPopIllustrations.length}`;
+
+            updateGallerySelection();
+
+            if (isUserAction) {
+                showToast(`已切換：${data.title}`);
+            }
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            const milliseconds = now.getMilliseconds();
+
+            // Handle 12 / 24 Hour Format
+            let displayHours = hours;
+            if (!is24Hour) {
+                displayHours = hours % 12 || 12;
+                ampmDisplay.innerText = hours >= 12 ? 'PM' : 'AM';
+                ampmDisplay.classList.remove('hidden');
+            } else {
+                ampmDisplay.classList.add('hidden');
+            }
+
+            // Pad zeros
+            clockHours.innerText = String(displayHours).padStart(2, '0');
+            clockMinutes.innerText = String(minutes).padStart(2, '0');
+            clockSeconds.innerText = String(seconds).padStart(2, '0');
+
+            // Date Formatting
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const date = String(now.getDate()).padStart(2, '0');
+            const daysInChinese = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            
+            dateDisplay.innerText = `${year} 年 ${month} 月 ${date} 日`;
+            dayDisplay.innerText = daysInChinese[now.getDay()];
+
+            // Minute Progress Bar & Countdown
+            const secondsRemaining = 60 - seconds;
+            countdownText.innerText = secondsRemaining;
+            const progressPercent = ((seconds + milliseconds / 1000) / 60) * 100;
+            minuteProgressBar.style.width = `${progressPercent}%`;
+
+            // Detect Minute Change -> Trigger Background Change
+            if (lastMinute !== -1 && minutes !== lastMinute) {
+                const nextIdx = (currentIndex + 1) % cityPopIllustrations.length;
+                setBackground(nextIdx);
+            }
+            lastMinute = minutes;
+        }
+
+        function toggleMusic() {
+            const musicBtn = document.getElementById('musicBtn');
+            const musicIcon = document.getElementById('musicIcon');
+            const musicLabel = document.getElementById('musicLabel');
+            const musicDiscIcon = document.getElementById('musicDiscIcon');
+
+            if (!isMusicPlaying) {
+                bgMusic.play().then(() => {
+                    isMusicPlaying = true;
+                    musicIcon.className = 'fa-solid fa-compact-disc text-pink-400 spin-music';
+                    musicDiscIcon.classList.add('spin-music');
+                    musicLabel.innerText = '背景音樂 : ON';
+                    musicBtn.classList.add('border-pink-400', 'bg-pink-500/20');
+                    showToast("已播放 80s City Pop 背景音樂");
+                }).catch(err => {
+                    showToast("無法自動播放，請檢查瀏覽器設定");
+                });
+            } else {
+                bgMusic.pause();
+                isMusicPlaying = false;
+                musicIcon.className = 'fa-solid fa-music text-pink-400';
+                musicDiscIcon.classList.remove('spin-music');
+                musicLabel.innerText = '背景音樂 : OFF';
+                musicBtn.classList.remove('border-pink-400', 'bg-pink-500/20');
+                showToast("已暫停背景音樂");
+            }
+        }
+
+        function initGallery() {
+            galleryGrid.innerHTML = '';
+            cityPopIllustrations.forEach((item, idx) => {
+                const card = document.createElement('div');
+                card.className = `gallery-item group relative rounded-xl overflow-hidden cursor-pointer border-2 transition-all duration-300 h-32 md:h-40 ${idx === currentIndex ? 'border-pink-400 scale-[1.02] shadow-lg shadow-pink-500/30' : 'border-white/10 hover:border-white/40'}`;
+                
+                card.innerHTML = `
+                    <div class="absolute inset-0 pointer-events-none">${item.svg}</div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent opacity-80 group-hover:opacity-60 transition"></div>
+                    <div class="absolute bottom-0 left-0 right-0 p-2.5 text-left">
+                        <div class="text-xs font-extrabold text-white truncate">${item.title}</div>
+                        <div class="text-[10px] text-pink-200/70 truncate">${item.desc}</div>
+                    </div>
+                `;
+
+                card.addEventListener('click', () => {
+                    setBackground(idx, true);
+                    closeGallery();
+                });
+
+                galleryGrid.appendChild(card);
+            });
+        }
+
+        function updateGallerySelection() {
+            const items = galleryGrid.querySelectorAll('.gallery-item');
+            items.forEach((item, idx) => {
+                if (idx === currentIndex) {
+                    item.className = 'gallery-item group relative rounded-xl overflow-hidden cursor-pointer border-2 transition-all duration-300 h-32 md:h-40 border-pink-400 scale-[1.02] shadow-lg shadow-pink-500/30';
+                } else {
+                    item.className = 'gallery-item group relative rounded-xl overflow-hidden cursor-pointer border-2 transition-all duration-300 h-32 md:h-40 border-white/10 hover:border-white/40';
+                }
+            });
+        }
+
+        // Toast Notification Helper
+        let toastTimeout;
+        function showToast(msg) {
+            toastMessage.innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        // Fullscreen Toggle
+        function toggleFullscreen() {
+            const icon = document.getElementById('fullscreenIcon');
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    showToast("無法開啟全螢幕");
+                });
+                icon.className = 'fa-solid fa-compress text-base';
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+                icon.className = 'fa-solid fa-expand text-base';
+            }
+        }
+
+        function openGallery() {
+            galleryModal.classList.remove('opacity-0', 'pointer-events-none');
+            galleryModal.classList.add('opacity-100');
+        }
+
+        function closeGallery() {
+            galleryModal.classList.remove('opacity-100');
+            galleryModal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        // Switch Font Logic
+        function switchFont() {
+            clockContainer.classList.remove(fontOptions[currentFontIndex].id);
+            currentFontIndex = (currentFontIndex + 1) % fontOptions.length;
+            const selectedFont = fontOptions[currentFontIndex];
+
+            clockContainer.classList.add(selectedFont.id);
+            fontLabel.innerText = selectedFont.name;
+
+            showToast(`已切換字體：${selectedFont.name}`);
+        }
+
+        document.getElementById('prevBgBtn').addEventListener('click', () => {
+            const prevIdx = (currentIndex - 1 + cityPopIllustrations.length) % cityPopIllustrations.length;
+            setBackground(prevIdx, true);
+        });
+
+        document.getElementById('nextBgBtn').addEventListener('click', () => {
+            const nextIdx = (currentIndex + 1) % cityPopIllustrations.length;
+            setBackground(nextIdx, true);
+        });
+
+        fontBtn.addEventListener('click', switchFont);
+
+        document.getElementById('formatBtn').addEventListener('click', (e) => {
+            is24Hour = !is24Hour;
+            e.target.innerText = is24Hour ? '24H' : '12H';
+            showToast(`已切換為 ${is24Hour ? '24' : '12'} 小時制`);
+            updateClock();
+        });
+
+        document.getElementById('musicBtn').addEventListener('click', toggleMusic);
+        document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
+        document.getElementById('galleryToggleBtn').addEventListener('click', openGallery);
+        document.getElementById('closeGalleryBtn').addEventListener('click', closeGallery);
+
+        galleryModal.addEventListener('click', (e) => {
+            if (e.target === galleryModal) closeGallery();
+        });
+
+        // Keyboard Shortcut Keys (Left/Right Arrows, F Key)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                const nextIdx = (currentIndex + 1) % cityPopIllustrations.length;
+                setBackground(nextIdx, true);
+            } else if (e.key === 'ArrowLeft') {
+                const prevIdx = (currentIndex - 1 + cityPopIllustrations.length) % cityPopIllustrations.length;
+                setBackground(prevIdx, true);
+            } else if (e.key === 'f' || e.key === 'F') {
+                toggleFullscreen();
+            }
+        });
+
+        // Initialization on Load
+        window.addEventListener('DOMContentLoaded', () => {
+            setBackground(0);
+            initGallery();
+            updateClock();
+            setInterval(updateClock, 200);
+        });
+    </script>
+</body>
+</html>
