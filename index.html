@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 小程式作品集 | 精選互動應用展示</title>
+  <meta name="description" content="AI 小程式作品集 - 匯聚時間工具、習慣養成、任務管理、個人履歷、休閒遊戲與財務視覺化等多元互動小應用。">
+
+  <!-- Google Fonts: Plus Jakarta Sans & Noto Sans TC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-dark: #07090e;
+      --bg-card: rgba(18, 22, 34, 0.75);
+      --bg-card-hover: rgba(28, 34, 52, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(99, 102, 241, 0.5);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-indigo: #6366f1;
+      --accent-cyan: #06b6d4;
+      --accent-pink: #ec4899;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --shadow-glow: 0 0 40px -10px rgba(99, 102, 241, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* Ambient Glowing Background Effect */
+    .ambient-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .ambient-glow-1 {
+      position: absolute;
+      top: -10%;
+      left: 20%;
+      width: 50vw;
+      height: 50vw;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0) 70%);
+      filter: blur(80px);
+      animation: floatSlow 18s ease-in-out infinite alternate;
+    }
+
+    .ambient-glow-2 {
+      position: absolute;
+      top: 40%;
+      right: -10%;
+      width: 45vw;
+      height: 45vw;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.12) 0%, rgba(6, 182, 212, 0) 70%);
+      filter: blur(90px);
+      animation: floatSlow 22s ease-in-out infinite alternate-reverse;
+    }
+
+    .ambient-glow-3 {
+      position: absolute;
+      bottom: -15%;
+      left: 5%;
+      width: 40vw;
+      height: 40vw;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(236, 72, 153, 0.1) 0%, rgba(236, 72, 153, 0) 70%);
+      filter: blur(100px);
+      animation: floatSlow 25s ease-in-out infinite alternate;
+    }
+
+    @keyframes floatSlow {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(40px, 30px) scale(1.1); }
+    }
+
+    /* Container Layout */
+    .app-container {
+      position: relative;
+      z-index: 1;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+      width: 100%;
+    }
+
+    /* Header / Hero Section */
+    .header {
+      text-align: center;
+      padding: 2rem 0 3rem;
+      position: relative;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1.1rem;
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #a5b4fc;
+      margin-bottom: 1.5rem;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+    }
+
+    .brand-badge i {
+      color: #818cf8;
+      font-size: 0.9rem;
+    }
+
+    .hero-title {
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #ffffff 20%, #cbd5e1 50%, #818cf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      color: var(--text-secondary);
+      max-width: 680px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.7;
+    }
+
+    /* Stats Ribbon */
+    .stats-ribbon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 0.5rem 1.25rem;
+      border-radius: 9999px;
+      border: 1px solid var(--border-subtle);
+      backdrop-filter: blur(8px);
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .stat-num {
+      font-weight: 800;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.05rem;
+    }
+
+    /* Search & Filter Toolbar */
+    .toolbar {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+      background: rgba(18, 22, 34, 0.6);
+      padding: 1.25rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      backdrop-filter: blur(12px);
+    }
+
+    @media (min-width: 768px) {
+      .toolbar {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+
+    .search-box {
+      position: relative;
+      flex: 1;
+      max-width: 420px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      pointer-events: none;
+      transition: color 0.2s ease;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.6rem;
+      background: rgba(10, 13, 20, 0.7);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-indigo);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .search-input:focus + .search-icon {
+      color: var(--accent-indigo);
+    }
+
+    /* Filter Tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+
+    .filter-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .filter-btn {
+      white-space: nowrap;
+      padding: 0.55rem 1.1rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .filter-btn:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .filter-btn.active {
+      background: rgba(99, 102, 241, 0.2);
+      color: #c7d2fe;
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.2);
+    }
+
+    /* Cards Grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.75rem;
+    }
+
+    @media (min-width: 640px) {
+      .cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .cards-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    /* Project Card */
+    .project-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(16px);
+      position: relative;
+    }
+
+    .project-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0) 50%, rgba(99, 102, 241, 0.25));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      opacity: 0.6;
+      transition: opacity 0.35s ease;
+    }
+
+    .project-card:hover {
+      transform: translateY(-6px);
+      background: var(--bg-card-hover);
+      border-color: rgba(99, 102, 241, 0.35);
+      box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.6), 0 0 30px -8px rgba(99, 102, 241, 0.2);
+    }
+
+    .project-card:hover::before {
+      opacity: 1;
+    }
+
+    /* Card Header / Visual Banner */
+    .card-banner {
+      height: 150px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0f1422;
+    }
+
+    .banner-graphic {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: transform 0.5s ease;
+    }
+
+    .project-card:hover .banner-graphic {
+      transform: scale(1.05);
+    }
+
+    /* Custom Gradients for Each App */
+    .theme-retro {
+      background: linear-gradient(135deg, #1b0c36 0%, #3e125a 50%, #ff2a85 100%);
+    }
+    .theme-water {
+      background: linear-gradient(135deg, #092c42 0%, #0d5c75 50%, #06b6d4 100%);
+    }
+    .theme-lemon {
+      background: linear-gradient(135deg, #3d2f09 0%, #85610a 50%, #facc15 100%);
+    }
+    .theme-resume {
+      background: linear-gradient(135deg, #0b2545 0%, #134074 50%, #4361ee 100%);
+    }
+    .theme-monopoly {
+      background: linear-gradient(135deg, #381523 0%, #831843 50%, #f43f5e 100%);
+    }
+    .theme-finance {
+      background: linear-gradient(135deg, #063828 0%, #065f46 50%, #10b981 100%);
+    }
+
+    .banner-icon {
+      font-size: 3.5rem;
+      color: rgba(255, 255, 255, 0.9);
+      filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.35));
+    }
+
+    .card-category-badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      letter-spacing: 0.02em;
+    }
+
+    /* Card Content */
+    .card-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .card-title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.35;
+    }
+
+    .card-desc {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      margin-bottom: 1.25rem;
+      line-height: 1.6;
+      flex-grow: 1;
+    }
+
+    /* Tag List */
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #94a3b8;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    /* Card Actions */
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .btn-open {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+      color: #ffffff;
+      padding: 0.75rem 1.2rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+    }
+
+    .btn-open:hover {
+      background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5);
+    }
+
+    .btn-open:active {
+      transform: translateY(0);
+    }
+
+    .btn-preview {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    .btn-preview:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Empty state */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 4rem 2rem;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px dashed var(--border-subtle);
+      display: none;
+    }
+
+    .empty-state.show {
+      display: block;
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    /* Modal / Preview Overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background: #0f131d;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 1100px;
+      height: 85vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 50px rgba(99, 102, 241, 0.2);
+      transform: scale(0.95);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      background: #141a29;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .modal-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .modal-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .modal-btn-open {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.9rem;
+      background: var(--accent-indigo);
+      color: #fff;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s ease;
+    }
+
+    .modal-btn-open:hover {
+      background: #4f46e5;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.25rem;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .modal-iframe-wrap {
+      flex: 1;
+      width: 100%;
+      background: #000;
+      position: relative;
+    }
+
+    .modal-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: auto;
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+      border-top: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-highlight {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Light Gradients -->
+  <div class="ambient-bg">
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+    <div class="ambient-glow-3"></div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="app-container">
+
+    <!-- Header / Hero -->
+    <header class="header">
+      <div class="brand-badge">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <span>AI CREATIVE SHOWCASE</span>
+      </div>
+      <h1 class="hero-title">AI 小程式作品集</h1>
+      <p class="hero-desc">
+        探索由 AI 輔助打造的多款精選互動應用，涵蓋生活工具、習慣追蹤、效率管理、休閒遊戲與商務數據視覺化。
+      </p>
+
+      <!-- Stats Bar -->
+      <div class="stats-ribbon">
+        <div class="stat-item">
+          <i class="fa-solid fa-layer-group" style="color: #818cf8;"></i>
+          <span>收錄小程式</span>
+          <span class="stat-num" id="totalAppsCount">6</span>
+        </div>
+        <div class="stat-item">
+          <i class="fa-solid fa-cubes" style="color: #38bdf8;"></i>
+          <span>應用類別</span>
+          <span class="stat-num">5</span>
+        </div>
+        <div class="stat-item">
+          <i class="fa-solid fa-bolt" style="color: #fbbf24;"></i>
+          <span>純前端免安裝</span>
+          <span class="stat-num">100%</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Toolbar: Search & Filters -->
+    <section class="toolbar">
+      <!-- Search Input -->
+      <div class="search-box">
+        <input 
+          type="text" 
+          id="searchInput" 
+          class="search-input" 
+          placeholder="搜尋小程式名稱、功能或標籤..."
+          autocomplete="off"
+        >
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+      </div>
+
+      <!-- Filter Categories -->
+      <div class="filter-tabs" id="filterTabs">
+        <button class="filter-btn active" data-category="all">
+          <i class="fa-solid fa-border-all"></i> 全部
+        </button>
+        <button class="filter-btn" data-category="tools">
+          <i class="fa-solid fa-clock"></i> 工具生活
+        </button>
+        <button class="filter-btn" data-category="productivity">
+          <i class="fa-solid fa-list-check"></i> 生產力
+        </button>
+        <button class="filter-btn" data-category="games">
+          <i class="fa-solid fa-dice"></i> 休閒娛樂
+        </button>
+        <button class="filter-btn" data-category="data">
+          <i class="fa-solid fa-chart-pie"></i> 數據分析
+        </button>
+        <button class="filter-btn" data-category="portfolio">
+          <i class="fa-solid fa-id-card"></i> 個人品牌
+        </button>
+      </div>
+    </section>
+
+    <!-- Project Cards Grid -->
+    <main class="cards-grid" id="cardsGrid">
+
+      <!-- Card 1: 80s City Pop 數字時鐘 -->
+      <article class="project-card" data-category="tools" data-keywords="80s city pop 數字時鐘 retro synthwave 音樂 時鐘 復古 翻頁時鐘 霓虹">
+        <div class="card-banner theme-retro">
+          <div class="banner-graphic">
+            <i class="fa-solid fa-compact-disc banner-icon"></i>
+          </div>
+          <span class="card-category-badge">工具生活</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title-row">
+            <h2 class="card-title">80s City Pop 數字時鐘</h2>
+          </div>
+          <p class="card-desc">
+            融合 80 年代日系 City Pop 霓虹復古美學的動態時鐘，支援 Synthwave 聲光效果與多種經典字型切換。
+          </p>
+          <div class="card-tags">
+            <span class="tag">80s Retro</span>
+            <span class="tag">City Pop</span>
+            <span class="tag">動態時鐘</span>
+            <span class="tag">聲光特效</span>
+          </div>
+          <div class="card-actions">
+            <a href="./80s%20City%20Pop%20%E6%95%B8%E5%AD%97%E6%99%82%E9%90%98.html" target="_blank" class="btn-open">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              <span>開啟</span>
+            </a>
+            <button class="btn-preview" title="即時預覽" onclick="openPreview('80s%20City%20Pop%20%E6%95%B8%E5%AD%97%E6%99%82%E9%90%98.html', '80s City Pop 數字時鐘')">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card 2: Daily Water Tracker -->
+      <article class="project-card" data-category="tools" data-keywords="daily water tracker 飲水 統計 記錄 northern hydro 健康 習慣 chartjs 追蹤">
+        <div class="card-banner theme-water">
+          <div class="banner-graphic">
+            <i class="fa-solid fa-droplet banner-icon"></i>
+          </div>
+          <span class="card-category-badge">健康習慣</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title-row">
+            <h2 class="card-title">Northern Hydro 飲水追蹤</h2>
+          </div>
+          <p class="card-desc">
+            北歐極簡美學的個人每日飲水目標追蹤器，具備直觀進度水球環、歷史數據圖表統計與自訂飲水量。
+          </p>
+          <div class="card-tags">
+            <span class="tag">健康追蹤</span>
+            <span class="tag">Chart.js</span>
+            <span class="tag">北歐極簡</span>
+            <span class="tag">本地儲存</span>
+          </div>
+          <div class="card-actions">
+            <a href="./Daily%20Water%20Tracker.html" target="_blank" class="btn-open">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              <span>開啟</span>
+            </a>
+            <button class="btn-preview" title="即時預覽" onclick="openPreview('Daily%20Water%20Tracker.html', 'Northern Hydro 每日飲水追蹤')">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card 3: Lively Lemon To-Do App -->
+      <article class="project-card" data-category="productivity" data-keywords="lively lemon todo app 鮮檸 待辦事項 任務 清單 tonejs 音效 生產力 活潑">
+        <div class="card-banner theme-lemon">
+          <div class="banner-graphic">
+            <i class="fa-solid fa-lemon banner-icon"></i>
+          </div>
+          <span class="card-category-badge">生產力</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title-row">
+            <h2 class="card-title">Lively Lemon 鮮檸待辦</h2>
+          </div>
+          <p class="card-desc">
+            鮮豔檸檬黃主題的活力待辦清單，結合 Tone.js 愉悅和弦音效反饋、分類標籤管理與進度回饋。
+          </p>
+          <div class="card-tags">
+            <span class="tag">待辦清單</span>
+            <span class="tag">Tone.js 音效</span>
+            <span class="tag">分類管理</span>
+            <span class="tag">互動動畫</span>
+          </div>
+          <div class="card-actions">
+            <a href="./Lively%20Lemon%20To-Do%20App.html" target="_blank" class="btn-open">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              <span>開啟</span>
+            </a>
+            <button class="btn-preview" title="即時預覽" onclick="openPreview('Lively%20Lemon%20To-Do%20App.html', 'Lively Lemon 鮮檸待辦清單')">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card 4: 個人專業履歷網站 -->
+      <article class="project-card" data-category="portfolio" data-keywords="個人專業履歷網站 陳諭柔 運動科技 醫療行政 履歷 resume portfolio 作品集 專業形象">
+        <div class="card-banner theme-resume">
+          <div class="banner-graphic">
+            <i class="fa-solid fa-user-tie banner-icon"></i>
+          </div>
+          <span class="card-category-badge">個人品牌</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title-row">
+            <h2 class="card-title">陳諭柔 個人專業履歷</h2>
+          </div>
+          <p class="card-desc">
+            現代化商務風格個人履歷展示網站，完美呈現運動科技與醫療行政跨領域經歷、技能專長與工作成就。
+          </p>
+          <div class="card-tags">
+            <span class="tag">個人履歷</span>
+            <span class="tag">深淺色切換</span>
+            <span class="tag">響應式佈局</span>
+            <span class="tag">專業形象</span>
+          </div>
+          <div class="card-actions">
+            <a href="./%E5%80%8B%E4%BA%BA%E5%B0%88%E6%A5%AD%E5%B1%A5%E6%AD%B7%E7%B6%B2%E7%AB%99.html" target="_blank" class="btn-open">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              <span>開啟</span>
+            </a>
+            <button class="btn-preview" title="即時預覽" onclick="openPreview('%E5%80%8B%E4%BA%BA%E5%B0%88%E6%A5%AD%E5%B1%A5%E6%AD%B7%E7%B6%B2%E7%AB%99.html', '陳諭柔 個人專業履歷網站')">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card 5: 台灣旅遊大富翁地圖 -->
+      <article class="project-card" data-category="games" data-keywords="台灣旅遊大富翁地圖 taiwan travel monopoly 遊戲 環島 景點 擲骰 機會 命運 娛樂">
+        <div class="card-banner theme-monopoly">
+          <div class="banner-graphic">
+            <i class="fa-solid fa-dice banner-icon"></i>
+          </div>
+          <span class="card-category-badge">休閒娛樂</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title-row">
+            <h2 class="card-title">台灣環島旅遊大富翁</h2>
+          </div>
+          <p class="card-desc">
+            探索台灣各地名勝景點的環島大富翁互動遊戲，包含擲骰前進、特色事件卡與通關紙花慶祝特效。
+          </p>
+          <div class="card-tags">
+            <span class="tag">大富翁遊戲</span>
+            <span class="tag">台灣旅遊</span>
+            <span class="tag">Confetti 特效</span>
+            <span class="tag">趣味互動</span>
+          </div>
+          <div class="card-actions">
+            <a href="./%E5%8F%B0%E7%81%A3%E6%97%85%E9%81%8A%E5%A4%A7%E5%AF%8C%E7%BF%81%E5%9C%B0%E5%9C%96.html" target="_blank" class="btn-open">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              <span>開啟</span>
+            </a>
+            <button class="btn-preview" title="即時預覽" onclick="openPreview('%E5%8F%B0%E7%81%A3%E6%97%85%E9%81%8A%E5%A4%A7%E5%AF%8C%E7%BF%81%E5%9C%B0%E5%9C%96.html', '台灣環島旅遊大富翁')">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card 6: 現金流量表與財務數據視覺化分析工具 -->
+      <article class="project-card" data-category="data" data-keywords="現金流量表與財務數據視覺化分析工具 echarts sheetjs 財務分析 報表 excel 視覺化 圖表 金融">
+        <div class="card-banner theme-finance">
+          <div class="banner-graphic">
+            <i class="fa-solid fa-chart-line banner-icon"></i>
+          </div>
+          <span class="card-category-badge">數據分析</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title-row">
+            <h2 class="card-title">現金流量與財務分析</h2>
+          </div>
+          <p class="card-desc">
+            整合 SheetJS 與 ECharts 的專業財務分析儀表板，支援 Excel 報表上傳解析、現金流動能與圖表展示。
+          </p>
+          <div class="card-tags">
+            <span class="tag">ECharts 圖表</span>
+            <span class="tag">SheetJS 支援</span>
+            <span class="tag">財務視覺化</span>
+            <span class="tag">數據分析</span>
+          </div>
+          <div class="card-actions">
+            <a href="./%E7%8F%BE%E9%87%91%E6%B5%81%E9%87%8F%E8%A1%A8%E8%88%87%E8%B2%A1%E5%8B%99%E6%95%B8%E6%93%9A%E8%A6%96%E8%A6%BA%E5%8C%96%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7.html" target="_blank" class="btn-open">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              <span>開啟</span>
+            </a>
+            <button class="btn-preview" title="即時預覽" onclick="openPreview('%E7%8F%BE%E9%87%91%E6%B5%81%E9%87%8F%E8%A1%A8%E8%88%87%E8%B2%A1%E5%8B%99%E6%95%B8%E6%93%9A%E8%A6%96%E8%A6%BA%E5%8C%96%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7.html', '現金流量與財務分析系統')">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Empty State -->
+      <div class="empty-state" id="emptyState">
+        <i class="fa-solid fa-magnifying-glass empty-icon"></i>
+        <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem; color: #fff;">找不到符合條件的小程式</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">請嘗試更換關鍵字或點擊「全部」分類檢視所有作品。</p>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Quick Preview Modal -->
+  <div class="modal-overlay" id="previewModal" onclick="handleModalOverlayClick(event)">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-window-maximize" style="color: var(--accent-indigo);"></i>
+          <span class="modal-title" id="modalTitle">小程式即時預覽</span>
+        </div>
+        <div class="modal-actions">
+          <a id="modalOpenLink" href="#" target="_blank" class="modal-btn-open">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            <span>在新分頁開啟</span>
+          </a>
+          <button class="modal-close" onclick="closePreview()" title="關閉預覽">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+      <div class="modal-iframe-wrap">
+        <iframe id="previewIframe" class="modal-iframe" src="about:blank"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>© 2026 <span class="footer-highlight">AI 小程式作品集</span> · 採用 Vanilla HTML / CSS / JS 精雕製作</p>
+  </footer>
+
+  <!-- Script for Filtering, Searching & Modal Preview -->
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const filterTabs = document.getElementById('filterTabs');
+    const cardsGrid = document.getElementById('cardsGrid');
+    const cards = Array.from(document.querySelectorAll('.project-card'));
+    const emptyState = document.getElementById('emptyState');
+    const totalAppsCount = document.getElementById('totalAppsCount');
+
+    let currentCategory = 'all';
+    let currentSearchTerm = '';
+
+    // Update total count
+    totalAppsCount.textContent = cards.length;
+
+    // Filter by Category
+    filterTabs.addEventListener('click', (e) => {
+      const btn = e.target.closest('.filter-btn');
+      if (!btn) return;
+
+      filterTabs.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentCategory = btn.dataset.category;
+      applyFilters();
+    });
+
+    // Filter by Search Query
+    searchInput.addEventListener('input', (e) => {
+      currentSearchTerm = e.target.value.trim().toLowerCase();
+      applyFilters();
+    });
+
+    function applyFilters() {
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        const category = card.dataset.category;
+        const keywords = (card.dataset.keywords || '').toLowerCase();
+        const title = card.querySelector('.card-title')?.textContent.toLowerCase() || '';
+        const desc = card.querySelector('.card-desc')?.textContent.toLowerCase() || '';
+
+        const matchCategory = (currentCategory === 'all' || category === currentCategory);
+        const matchSearch = !currentSearchTerm || 
+          title.includes(currentSearchTerm) || 
+          desc.includes(currentSearchTerm) || 
+          keywords.includes(currentSearchTerm);
+
+        if (matchCategory && matchSearch) {
+          card.style.display = 'flex';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      if (visibleCount === 0) {
+        emptyState.classList.add('show');
+      } else {
+        emptyState.classList.remove('show');
+      }
+    }
+
+    // Modal Preview Logic
+    const modal = document.getElementById('previewModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalIframe = document.getElementById('previewIframe');
+    const modalOpenLink = document.getElementById('modalOpenLink');
+
+    function openPreview(url, title) {
+      modalTitle.textContent = title;
+      modalOpenLink.href = url;
+      modalIframe.src = url;
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closePreview() {
+      modal.classList.remove('active');
+      modalIframe.src = 'about:blank';
+      document.body.style.overflow = '';
+    }
+
+    function handleModalOverlayClick(e) {
+      if (e.target === modal) {
+        closePreview();
+      }
+    }
+
+    // ESC key closes modal
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('active')) {
+        closePreview();
+      }
+    });
+  </script>
+</body>
+</html>
