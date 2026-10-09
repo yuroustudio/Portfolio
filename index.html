@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI 小程式作品集 | 精選互動應用展示</title>
-  <meta name="description" content="AI 小程式作品集 - 匯聚時間工具、習慣養成、任務管理、個人履歷、休閒遊戲與財務視覺化等多元互動小應用。">
+  <title>小程式作品集 | 精選互動應用展示</title>
+  <meta name="description" content="小程式作品集 - 匯聚時間工具、習慣養成、任務管理、個人履歷、休閒遊戲與財務視覺化等多元互動小應用。">
 
   <!-- Google Fonts: Plus Jakarta Sans & Noto Sans TC -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,23 +16,24 @@
 
   <style>
     :root {
-      --bg-dark: #07090e;
-      --bg-card: rgba(18, 22, 34, 0.75);
-      --bg-card-hover: rgba(28, 34, 52, 0.85);
-      --border-subtle: rgba(255, 255, 255, 0.08);
-      --border-focus: rgba(99, 102, 241, 0.5);
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
-      --accent-indigo: #6366f1;
-      --accent-cyan: #06b6d4;
-      --accent-pink: #ec4899;
-      --accent-emerald: #10b981;
-      --accent-amber: #f59e0b;
-      --radius-sm: 8px;
-      --radius-md: 16px;
-      --radius-lg: 24px;
-      --shadow-glow: 0 0 40px -10px rgba(99, 102, 241, 0.25);
+      --bg-dark: #F7EDE2;
+      --bg-card: #FFFCF7;
+      --bg-card-hover: #FFFFFF;
+      --border-subtle: rgba(28, 16, 51, 0.09);
+      --border-focus: rgba(235, 122, 60, 0.5);
+      --text-primary: #1C1033;
+      --text-secondary: #6B5F7E;
+      --text-muted: #978BA8;
+      --accent-indigo: #8E5FC4;
+      --accent-cyan: #3FB6BE;
+      --accent-pink: #EF7FA0;
+      --accent-emerald: #3FB6BE;
+      --accent-amber: #F2B94C;
+      --accent-orange: #EB7A3C;
+      --radius-sm: 10px;
+      --radius-md: 18px;
+      --radius-lg: 26px;
+      --shadow-glow: 0 12px 30px -10px rgba(235, 122, 60, 0.25);
     }
 
     * {
@@ -52,7 +53,18 @@
       line-height: 1.6;
     }
 
-    /* Ambient Glowing Background Effect */
+    /* Grain texture — faint noise overlay to echo the reference art's gritty texture */
+    .grain-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.05;
+      mix-blend-mode: multiply;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* Ambient Gradient Blobs — soft, painterly color blooms instead of neon glow */
     .ambient-bg {
       position: fixed;
       top: 0;
@@ -67,23 +79,23 @@
     .ambient-glow-1 {
       position: absolute;
       top: -10%;
-      left: 20%;
+      left: 15%;
       width: 50vw;
       height: 50vw;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0) 70%);
+      background: radial-gradient(circle, rgba(235, 122, 60, 0.28) 0%, rgba(235, 122, 60, 0) 70%);
       filter: blur(80px);
       animation: floatSlow 18s ease-in-out infinite alternate;
     }
 
     .ambient-glow-2 {
       position: absolute;
-      top: 40%;
-      right: -10%;
+      top: 38%;
+      right: -12%;
       width: 45vw;
       height: 45vw;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(6, 182, 212, 0.12) 0%, rgba(6, 182, 212, 0) 70%);
+      background: radial-gradient(circle, rgba(63, 182, 190, 0.22) 0%, rgba(63, 182, 190, 0) 70%);
       filter: blur(90px);
       animation: floatSlow 22s ease-in-out infinite alternate-reverse;
     }
@@ -91,18 +103,48 @@
     .ambient-glow-3 {
       position: absolute;
       bottom: -15%;
-      left: 5%;
-      width: 40vw;
-      height: 40vw;
+      left: 8%;
+      width: 42vw;
+      height: 42vw;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(236, 72, 153, 0.1) 0%, rgba(236, 72, 153, 0) 70%);
+      background: radial-gradient(circle, rgba(142, 95, 196, 0.2) 0%, rgba(142, 95, 196, 0) 70%);
       filter: blur(100px);
       animation: floatSlow 25s ease-in-out infinite alternate;
+    }
+
+    .ambient-glow-4 {
+      position: absolute;
+      top: 8%;
+      right: 18%;
+      width: 24vw;
+      height: 24vw;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(239, 127, 160, 0.22) 0%, rgba(239, 127, 160, 0) 70%);
+      filter: blur(70px);
+      animation: floatSlow 20s ease-in-out infinite alternate-reverse;
     }
 
     @keyframes floatSlow {
       0% { transform: translate(0, 0) scale(1); }
       100% { transform: translate(40px, 30px) scale(1.1); }
+    }
+
+    /* Sparkle accents — small four-point stars echoing the reference art */
+    .sparkle {
+      position: absolute;
+      color: var(--accent-amber);
+      filter: drop-shadow(0 2px 6px rgba(242, 185, 76, 0.4));
+      animation: twinkle 3.2s ease-in-out infinite;
+    }
+    .sparkle svg { width: 100%; height: 100%; display: block; }
+    .sparkle-1 { top: 6%;  left: 10%; width: 22px; height: 22px; color: var(--accent-orange); animation-delay: 0s; }
+    .sparkle-2 { top: 14%; right: 14%; width: 16px; height: 16px; color: var(--accent-pink); animation-delay: 0.6s; }
+    .sparkle-3 { top: 48%; left: 6%;  width: 14px; height: 14px; color: var(--accent-indigo); animation-delay: 1.2s; }
+    .sparkle-4 { top: 60%; right: 9%; width: 20px; height: 20px; color: var(--accent-amber); animation-delay: 1.8s; }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.35; transform: scale(0.85); }
+      50% { opacity: 1; transform: scale(1.05); }
     }
 
     /* Container Layout */
@@ -116,30 +158,62 @@
     }
 
     /* Header / Hero Section */
+    /* Header is now a full-bleed illustrated "cover band", like a magazine
+       masthead, instead of plain centered text on the page background. */
     .header {
       text-align: center;
-      padding: 2rem 0 3rem;
+      padding: clamp(3rem, 8vw, 4.5rem) 2rem clamp(3.5rem, 9vw, 5rem);
+      margin-bottom: 2.5rem;
       position: relative;
+      overflow: hidden;
+      border-radius: 32px;
+      background: linear-gradient(135deg, #1C1033 0%, #5B3B6E 35%, #C9456F 68%, #EB7A3C 100%);
+      box-shadow: 0 24px 55px -22px rgba(28, 16, 51, 0.45);
     }
+
+    .header-blob-1, .header-blob-2 {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(60px);
+    }
+    .header-blob-1 {
+      top: -20%; left: -8%; width: 45%; aspect-ratio: 1;
+      background: radial-gradient(circle, rgba(242, 185, 76, 0.45) 0%, rgba(242, 185, 76, 0) 70%);
+    }
+    .header-blob-2 {
+      bottom: -25%; right: -10%; width: 50%; aspect-ratio: 1;
+      background: radial-gradient(circle, rgba(63, 182, 190, 0.35) 0%, rgba(63, 182, 190, 0) 70%);
+    }
+    .header-sparkle {
+      position: absolute;
+      color: rgba(255, 255, 255, 0.85);
+      animation: twinkle 3.2s ease-in-out infinite;
+    }
+    .header-sparkle svg { width: 100%; height: 100%; display: block; }
+    .header-sparkle.s1 { top: 14%; left: 12%; width: 18px; height: 18px; animation-delay: 0.2s; }
+    .header-sparkle.s2 { top: 22%; right: 16%; width: 24px; height: 24px; animation-delay: 1s; }
+    .header-sparkle.s3 { bottom: 16%; left: 20%; width: 14px; height: 14px; animation-delay: 1.8s; }
+
+    .header > * { position: relative; z-index: 1; }
 
     .brand-badge {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
       padding: 0.4rem 1.1rem;
-      background: rgba(99, 102, 241, 0.12);
-      border: 1px solid rgba(99, 102, 241, 0.3);
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.3);
       border-radius: 9999px;
       font-size: 0.85rem;
       font-weight: 600;
-      color: #a5b4fc;
+      color: #fff;
       margin-bottom: 1.5rem;
       backdrop-filter: blur(8px);
-      box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
     }
 
     .brand-badge i {
-      color: #818cf8;
+      color: #F2B94C;
       font-size: 0.9rem;
     }
 
@@ -149,16 +223,15 @@
       letter-spacing: -0.03em;
       line-height: 1.15;
       margin-bottom: 1rem;
-      background: linear-gradient(135deg, #ffffff 20%, #cbd5e1 50%, #818cf8 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: #fff;
+      text-shadow: 0 6px 28px rgba(28, 16, 51, 0.35);
     }
 
     .hero-desc {
       font-size: clamp(1rem, 2vw, 1.15rem);
-      color: var(--text-secondary);
+      color: rgba(255, 255, 255, 0.88);
       max-width: 680px;
-      margin: 0 auto 2.5rem;
+      margin: 0 auto;
       line-height: 1.7;
     }
 
@@ -176,7 +249,7 @@
       display: flex;
       align-items: center;
       gap: 0.6rem;
-      background: rgba(255, 255, 255, 0.03);
+      background: rgba(255, 255, 255, 0.55);
       padding: 0.5rem 1.25rem;
       border-radius: 9999px;
       border: 1px solid var(--border-subtle);
@@ -192,17 +265,15 @@
       font-size: 1.05rem;
     }
 
-    /* Search & Filter Toolbar */
+    /* Search & Filter Toolbar — flattened to a quiet section rule rather
+       than a boxed app-toolbar, closer to a magazine section divider. */
     .toolbar {
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
-      margin-bottom: 2.5rem;
-      background: rgba(18, 22, 34, 0.6);
-      padding: 1.25rem;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border-subtle);
-      backdrop-filter: blur(12px);
+      margin-bottom: 3rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border-subtle);
     }
 
     @media (min-width: 768px) {
@@ -216,12 +287,12 @@
     .search-box {
       position: relative;
       flex: 1;
-      max-width: 420px;
+      max-width: 360px;
     }
 
     .search-icon {
       position: absolute;
-      left: 1rem;
+      left: 0.2rem;
       top: 50%;
       transform: translateY(-50%);
       color: var(--text-muted);
@@ -232,24 +303,25 @@
 
     .search-input {
       width: 100%;
-      padding: 0.75rem 1rem 0.75rem 2.6rem;
-      background: rgba(10, 13, 20, 0.7);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
+      padding: 0.6rem 0.2rem 0.6rem 1.8rem;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid var(--border-subtle);
+      border-radius: 0;
       color: var(--text-primary);
-      font-size: 0.95rem;
+      font-size: 1rem;
       font-family: inherit;
       outline: none;
       transition: all 0.2s ease;
     }
 
     .search-input:focus {
-      border-color: var(--accent-indigo);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+      border-bottom-color: var(--accent-orange);
+      box-shadow: none;
     }
 
     .search-input:focus + .search-icon {
-      color: var(--accent-indigo);
+      color: var(--accent-orange);
     }
 
     /* Filter Tabs */
@@ -283,46 +355,50 @@
 
     .filter-btn:hover {
       color: var(--text-primary);
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(28, 16, 51, 0.05);
     }
 
     .filter-btn.active {
-      background: rgba(99, 102, 241, 0.2);
-      color: #c7d2fe;
-      border-color: rgba(99, 102, 241, 0.4);
-      box-shadow: 0 0 16px rgba(99, 102, 241, 0.2);
+      background: rgba(235, 122, 60, 0.16);
+      color: #C85A1E;
+      border-color: rgba(235, 122, 60, 0.4);
+      box-shadow: 0 0 16px rgba(235, 122, 60, 0.18);
     }
 
     /* Cards Grid */
+    /* Magazine-style feature list: one column, each entry a wide row that
+       alternates image/text sides instead of a uniform card grid. */
     .cards-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 3rem;
     }
 
-    @media (min-width: 640px) {
-      .cards-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (min-width: 1024px) {
-      .cards-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    /* Project Card */
+    /* Project Card — a feature row: banner on one side, write-up on the other */
     .project-card {
       background: var(--bg-card);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
       overflow: hidden;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
+      align-items: stretch;
+      min-height: 320px;
       transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 28px -14px rgba(28, 16, 51, 0.18);
       position: relative;
+    }
+
+    .cards-grid > .project-card:nth-child(even) {
+      flex-direction: row-reverse;
+    }
+
+    @media (max-width: 760px) {
+      .project-card,
+      .cards-grid > .project-card:nth-child(even) {
+        flex-direction: column;
+        min-height: 0;
+      }
     }
 
     .project-card::before {
@@ -331,7 +407,7 @@
       inset: 0;
       border-radius: inherit;
       padding: 1px;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0) 50%, rgba(99, 102, 241, 0.25));
+      background: linear-gradient(135deg, rgba(235, 122, 60, 0.25), rgba(255, 255, 255, 0) 50%, rgba(142, 95, 196, 0.25));
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
       mask-composite: exclude;
@@ -343,23 +419,31 @@
     .project-card:hover {
       transform: translateY(-6px);
       background: var(--bg-card-hover);
-      border-color: rgba(99, 102, 241, 0.35);
-      box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.6), 0 0 30px -8px rgba(99, 102, 241, 0.2);
+      border-color: rgba(235, 122, 60, 0.3);
+      box-shadow: 0 18px 40px -16px rgba(28, 16, 51, 0.28), 0 0 30px -12px rgba(235, 122, 60, 0.25);
     }
 
     .project-card:hover::before {
       opacity: 1;
     }
 
-    /* Card Header / Visual Banner */
+    /* Card Header / Visual Banner — fills its side of the feature row */
     .card-banner {
-      height: 150px;
+      flex: 0 0 42%;
       position: relative;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #0f1422;
+      background: #1C1033;
+    }
+
+    @media (max-width: 760px) {
+      .card-banner {
+        flex: none;
+        height: 220px;
+        width: 100%;
+      }
     }
 
     .banner-graphic {
@@ -376,65 +460,73 @@
       transform: scale(1.05);
     }
 
-    /* Theme Gradients — 新增作品要用新配色時，在這裡加一組 .theme-xxx */
+    /* Theme Gradients — 新增作品要用新配色時，在這裡加一組 .theme-xxx（都取自同一組奶油/橘/粉/紫/藍綠色盤） */
     .theme-retro {
-      background: linear-gradient(135deg, #1b0c36 0%, #3e125a 50%, #ff2a85 100%);
+      background: linear-gradient(135deg, #3A1F5C 0%, #8E5FC4 55%, #EF7FA0 100%);
     }
     .theme-water {
-      background: linear-gradient(135deg, #092c42 0%, #0d5c75 50%, #06b6d4 100%);
+      background: linear-gradient(135deg, #123B41 0%, #1F7A82 55%, #3FB6BE 100%);
     }
     .theme-lemon {
-      background: linear-gradient(135deg, #3d2f09 0%, #85610a 50%, #facc15 100%);
+      background: linear-gradient(135deg, #5C3B12 0%, #D98A2B 55%, #F2B94C 100%);
     }
     .theme-monopoly {
-      background: linear-gradient(135deg, #381523 0%, #831843 50%, #f43f5e 100%);
+      background: linear-gradient(135deg, #4A1030 0%, #C9456F 55%, #EF7FA0 100%);
     }
     .theme-finance {
-      background: linear-gradient(135deg, #063828 0%, #065f46 50%, #10b981 100%);
+      background: linear-gradient(135deg, #142043 0%, #3FB6BE 55%, #8E5FC4 100%);
     }
     .theme-violet {
-      background: linear-gradient(135deg, #2e1065 0%, #5b21b6 50%, #a78bfa 100%);
+      background: linear-gradient(135deg, #2A1B42 0%, #6B46A8 55%, #8E5FC4 100%);
     }
     .theme-ocean {
-      background: linear-gradient(135deg, #0c1e3d 0%, #1e40af 50%, #38bdf8 100%);
+      background: linear-gradient(135deg, #16213D 0%, #3B6FA0 55%, #3FB6BE 100%);
     }
     .theme-sunset {
-      background: linear-gradient(135deg, #431407 0%, #c2410c 50%, #fb923c 100%);
+      background: linear-gradient(135deg, #5C2A12 0%, #D9602B 55%, #F2B94C 100%);
     }
     .theme-slate {
-      background: linear-gradient(135deg, #0f172a 0%, #334155 50%, #94a3b8 100%);
+      background: linear-gradient(135deg, #1C1033 0%, #5B4F6E 55%, #8B7F9B 100%);
     }
     .theme-diet {
-      background: linear-gradient(135deg, #0d2a33 0%, #204654 50%, #D85A30 100%);
+      background: linear-gradient(135deg, #1C1033 0%, #5B3B6E 50%, #EB7A3C 100%);
     }
 
     .banner-icon {
-      font-size: 3.5rem;
+      font-size: 5rem;
       color: rgba(255, 255, 255, 0.9);
       filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.35));
+    }
+
+    @media (max-width: 760px) {
+      .banner-icon { font-size: 3.5rem; }
     }
 
     .card-category-badge {
       position: absolute;
       top: 1rem;
       right: 1rem;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(28, 16, 51, 0.55);
       backdrop-filter: blur(8px);
       padding: 0.25rem 0.75rem;
       border-radius: 9999px;
       font-size: 0.75rem;
       font-weight: 700;
       color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       letter-spacing: 0.02em;
     }
 
     /* Card Content */
     .card-body {
-      padding: 1.5rem;
+      padding: 2.25rem;
       display: flex;
       flex-direction: column;
       flex: 1;
+    }
+
+    @media (max-width: 760px) {
+      .card-body { padding: 1.5rem; }
     }
 
     .card-title-row {
@@ -446,10 +538,10 @@
     }
 
     .card-title {
-      font-size: 1.25rem;
-      font-weight: 700;
+      font-size: 1.6rem;
+      font-weight: 800;
       color: var(--text-primary);
-      line-height: 1.35;
+      line-height: 1.3;
     }
 
     .card-desc {
@@ -473,9 +565,9 @@
       font-weight: 600;
       padding: 0.2rem 0.6rem;
       border-radius: 6px;
-      background: rgba(255, 255, 255, 0.05);
-      color: #94a3b8;
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(28, 16, 51, 0.05);
+      color: var(--text-secondary);
+      border: 1px solid rgba(28, 16, 51, 0.07);
     }
 
     /* Card Actions */
@@ -494,7 +586,7 @@
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+      background: linear-gradient(135deg, #EB7A3C 0%, #EF7FA0 100%);
       color: #ffffff;
       padding: 0.75rem 1.2rem;
       border-radius: var(--radius-sm);
@@ -504,13 +596,13 @@
       border: none;
       cursor: pointer;
       transition: all 0.25s ease;
-      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+      box-shadow: 0 4px 14px rgba(235, 122, 60, 0.35);
     }
 
     .btn-open:hover {
-      background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+      background: linear-gradient(135deg, #D9602B 0%, #EB7A3C 100%);
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5);
+      box-shadow: 0 6px 20px rgba(235, 122, 60, 0.45);
     }
 
     .btn-open:active {
@@ -524,7 +616,7 @@
       width: 44px;
       height: 44px;
       border-radius: var(--radius-sm);
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(28, 16, 51, 0.05);
       color: var(--text-secondary);
       border: 1px solid var(--border-subtle);
       cursor: pointer;
@@ -533,9 +625,9 @@
     }
 
     .btn-preview:hover {
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba(28, 16, 51, 0.1);
       color: var(--text-primary);
-      border-color: rgba(255, 255, 255, 0.2);
+      border-color: rgba(28, 16, 51, 0.18);
     }
 
     /* Empty state */
@@ -563,7 +655,7 @@
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(3, 7, 18, 0.85);
+      background: rgba(28, 16, 51, 0.72);
       backdrop-filter: blur(12px);
       z-index: 100;
       display: flex;
@@ -590,7 +682,7 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 50px rgba(99, 102, 241, 0.2);
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 50px rgba(235, 122, 60, 0.2);
       transform: scale(0.95);
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -631,7 +723,7 @@
       align-items: center;
       gap: 0.4rem;
       padding: 0.45rem 0.9rem;
-      background: var(--accent-indigo);
+      background: var(--accent-orange);
       color: #fff;
       border-radius: 6px;
       font-size: 0.85rem;
@@ -641,7 +733,7 @@
     }
 
     .modal-btn-open:hover {
-      background: #4f46e5;
+      background: #D9602B;
     }
 
     .modal-close {
@@ -697,46 +789,60 @@
 </head>
 <body>
 
-  <!-- Ambient Light Gradients -->
+  <!-- Grain texture overlay -->
+  <div class="grain-overlay"></div>
+
+  <!-- Ambient Gradient Blobs -->
   <div class="ambient-bg">
     <div class="ambient-glow-1"></div>
     <div class="ambient-glow-2"></div>
     <div class="ambient-glow-3"></div>
+    <div class="ambient-glow-4"></div>
+    <div class="sparkle sparkle-1"><svg viewBox="0 0 24 24"><path d="M12 0 L14.5 9.5 L24 12 L14.5 14.5 L12 24 L9.5 14.5 L0 12 L9.5 9.5 Z" fill="currentColor"/></svg></div>
+    <div class="sparkle sparkle-2"><svg viewBox="0 0 24 24"><path d="M12 0 L14.5 9.5 L24 12 L14.5 14.5 L12 24 L9.5 14.5 L0 12 L9.5 9.5 Z" fill="currentColor"/></svg></div>
+    <div class="sparkle sparkle-3"><svg viewBox="0 0 24 24"><path d="M12 0 L14.5 9.5 L24 12 L14.5 14.5 L12 24 L9.5 14.5 L0 12 L9.5 9.5 Z" fill="currentColor"/></svg></div>
+    <div class="sparkle sparkle-4"><svg viewBox="0 0 24 24"><path d="M12 0 L14.5 9.5 L24 12 L14.5 14.5 L12 24 L9.5 14.5 L0 12 L9.5 9.5 Z" fill="currentColor"/></svg></div>
   </div>
 
   <!-- Main Container -->
   <div class="app-container">
 
-    <!-- Header / Hero -->
+    <!-- Header / Hero: illustrated cover band -->
     <header class="header">
+      <div class="header-blob-1"></div>
+      <div class="header-blob-2"></div>
+      <div class="header-sparkle s1"><svg viewBox="0 0 24 24"><path d="M12 0 L14.5 9.5 L24 12 L14.5 14.5 L12 24 L9.5 14.5 L0 12 L9.5 9.5 Z" fill="currentColor"/></svg></div>
+      <div class="header-sparkle s2"><svg viewBox="0 0 24 24"><path d="M12 0 L14.5 9.5 L24 12 L14.5 14.5 L12 24 L9.5 14.5 L0 12 L9.5 9.5 Z" fill="currentColor"/></svg></div>
+      <div class="header-sparkle s3"><svg viewBox="0 0 24 24"><path d="M12 0 L14.5 9.5 L24 12 L14.5 14.5 L12 24 L9.5 14.5 L0 12 L9.5 9.5 Z" fill="currentColor"/></svg></div>
+
       <div class="brand-badge">
         <i class="fa-solid fa-wand-magic-sparkles"></i>
         <span>AI CREATIVE SHOWCASE</span>
       </div>
-      <h1 class="hero-title">AI 小程式作品集</h1>
+      <h1 class="hero-title">小程式作品集</h1>
       <p class="hero-desc">
         探索由 AI 輔助打造的多款精選互動應用，涵蓋生活工具、習慣追蹤、效率管理、休閒遊戲與商務數據視覺化。
       </p>
-
-      <!-- Stats Bar：數字皆由 JS 依 projects 資料自動計算，不需手動修改 -->
-      <div class="stats-ribbon">
-        <div class="stat-item">
-          <i class="fa-solid fa-layer-group" style="color: #818cf8;"></i>
-          <span>收錄小程式</span>
-          <span class="stat-num" id="totalAppsCount">0</span>
-        </div>
-        <div class="stat-item">
-          <i class="fa-solid fa-cubes" style="color: #38bdf8;"></i>
-          <span>應用類別</span>
-          <span class="stat-num" id="totalCategoryCount">0</span>
-        </div>
-        <div class="stat-item">
-          <i class="fa-solid fa-bolt" style="color: #fbbf24;"></i>
-          <span>純前端免安裝</span>
-          <span class="stat-num">100%</span>
-        </div>
-      </div>
     </header>
+
+    <!-- Stats Bar：數字皆由 JS 依 projects 資料自動計算，不需手動修改 -->
+    <div class="stats-ribbon">
+      <div class="stat-item">
+        <i class="fa-solid fa-layer-group" style="color: #EB7A3C;"></i>
+        <span>收錄小程式</span>
+        <span class="stat-num" id="totalAppsCount">0</span>
+      </div>
+      <div class="stat-item">
+        <i class="fa-solid fa-cubes" style="color: #3FB6BE;"></i>
+        <span>應用類別</span>
+        <span class="stat-num" id="totalCategoryCount">0</span>
+      </div>
+      <div class="stat-item">
+        <i class="fa-solid fa-bolt" style="color: #F2B94C;"></i>
+        <span>純前端免安裝</span>
+        <span class="stat-num">100%</span>
+      </div>
+    </div>
 
     <!-- Toolbar: Search & Filters -->
     <section class="toolbar">
@@ -762,7 +868,7 @@
       <!-- Empty State -->
       <div class="empty-state" id="emptyState">
         <i class="fa-solid fa-magnifying-glass empty-icon"></i>
-        <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem; color: #fff;">找不到符合條件的小程式</h3>
+        <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--text-primary);">找不到符合條件的小程式</h3>
         <p style="color: var(--text-muted); font-size: 0.95rem;">請嘗試更換關鍵字或點擊「全部」分類檢視所有作品。</p>
       </div>
 
@@ -796,7 +902,7 @@
 
   <!-- Footer -->
   <footer class="footer">
-    <p>© 2026 <span class="footer-highlight">AI 小程式作品集</span> · 採用 Vanilla HTML / CSS / JS 精雕製作</p>
+    <p>© 2026 <span class="footer-highlight">小程式作品集</span> · 採用 Vanilla HTML / CSS / JS 精雕製作</p>
   </footer>
 
   <!-- ============================================================
@@ -832,6 +938,17 @@
     //    keywords   → 額外的搜尋關鍵字（可包含英文、拼音、同義詞），提升搜尋比對命中率
     // -----------------------------------------------------------
     const projects = [
+      {
+        file: 'diet-plan/index.html',
+        category: 'tools',
+        categoryLabel: '健康習慣',
+        title: '飲食紀錄',
+        desc: '新野獸派風格的每日飲食與體態紀錄工具，追蹤熱量三大營養素、每月 InBody 數據與目標達成進度，支援離線安裝使用。',
+        tags: ['熱量追蹤', 'InBody 體態', '連續紀錄遊戲化', 'PWA 離線支援'],
+        icon: 'fa-bowl-food',
+        theme: 'theme-diet',
+        keywords: 'diet tracker 熱量 蛋白質 inbody 體態目標 骨骼肌 連續紀錄 neubrutalism pwa 離線'
+      },
       {
         file: '80s City Pop 數字時鐘.html',
         category: 'tools',
@@ -886,17 +1003,6 @@
         icon: 'fa-chart-line',
         theme: 'theme-finance',
         keywords: 'echarts sheetjs 財務分析 報表 excel 視覺化 圖表 金融'
-      },
-      {
-        file: 'diet-plan/index.html',
-        category: 'tools',
-        categoryLabel: '健康習慣',
-        title: '飲食紀錄',
-        desc: '新野獸派風格的每日飲食與體態紀錄工具，追蹤熱量三大營養素、每月 InBody 數據與目標達成進度，支援離線安裝使用。',
-        tags: ['熱量追蹤', 'InBody 體態', '連續紀錄遊戲化', 'PWA 離線支援'],
-        icon: 'fa-bowl-food',
-        theme: 'theme-diet',
-        keywords: 'diet tracker 熱量 蛋白質 inbody 體態目標 骨骼肌 連續紀錄 neubrutalism pwa 離線'
       },
 
       // ↓↓↓ 範例：要新增作品時，複製這個物件、貼在上一筆後面、改內容即可 ↓↓↓
